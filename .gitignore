@@ -1,0 +1,31 @@
+node_modules/
+dist/
+.gametool/
+output/
+.playwright-cli/
+.DS_Store
+*.tsbuildinfo
+
+# Local credentials and connection state (including custom workspaces).
+.env
+.env.*
+!.env.example
+!.env.template
+.npmrc
+.netrc
+.pypirc
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+service.json
+service.lock
+*.log
+
+# Reproducible font cache; keep catalog, source URLs, hashes and licenses.
+/assets/fonts/**/*.ttf
+/assets/fonts/**/*.otf
+/assets/fonts/**/*.woff
+/assets/fonts/**/*.woff2

@@ -1,0 +1,4 @@
+interface:
+  display_name: "GameTool Effects"
+  short_description: "로컬 GameTool로 UI·파티클을 만들고 세 런타임 코드를 생성합니다"
+  default_prompt: "Use $gametool-effects to create and validate a local game UI or particle effect for Flutter, Phaser, or Three.js."

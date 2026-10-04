@@ -1,0 +1,571 @@
+{
+  "referenceVersion": "text-apng-maker v1.07 (2026-10-04)",
+  "scope": "Editable effect semantics and generated runtime code; raster encoder settings replaced by runtime output.",
+  "controls": [
+    {
+      "reference": "align",
+      "recipe": "typography.align",
+      "status": "implemented"
+    },
+    {
+      "reference": "anchor",
+      "recipe": "layout.anchor",
+      "status": "implemented"
+    },
+    {
+      "reference": "autoFit",
+      "recipe": "layout.autoFit",
+      "status": "implemented"
+    },
+    {
+      "reference": "bg.color",
+      "recipe": "backdrop.color",
+      "status": "implemented"
+    },
+    {
+      "reference": "bg.opacity",
+      "recipe": "backdrop.opacity",
+      "status": "implemented"
+    },
+    {
+      "reference": "bg.sync",
+      "recipe": "backdrop.sync",
+      "status": "implemented"
+    },
+    {
+      "reference": "bg.type",
+      "recipe": "backdrop.type",
+      "status": "implemented"
+    },
+    {
+      "reference": "cps",
+      "recipe": "sequence.cps",
+      "status": "implemented"
+    },
+    {
+      "reference": "cursor",
+      "recipe": "sequence.cursor",
+      "status": "implemented"
+    },
+    {
+      "reference": "cursorColor",
+      "recipe": "layout.cursorColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.anim",
+      "recipe": "frame.animation",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.color",
+      "recipe": "frame.fillColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.color2",
+      "recipe": "frame.color",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.dur",
+      "recipe": "frame.duration",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.extend",
+      "recipe": "frame.extend",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.opacity",
+      "recipe": "frame.fillOpacity",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.outline",
+      "recipe": "frame.outline",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.pad",
+      "recipe": "frame.padding",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.radius",
+      "recipe": "frame.radius",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.sideFade",
+      "recipe": "frame.sideFade",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.soft",
+      "recipe": "frame.softness",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.tapeBlink",
+      "recipe": "frame.tapeBlink",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.tapeColor",
+      "recipe": "frame.tapeColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.tapeSize",
+      "recipe": "frame.tapeSize",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.tapeSpeed",
+      "recipe": "frame.tapeSpeed",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.tapeStripe",
+      "recipe": "frame.tapeStripe",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.thickness",
+      "recipe": "frame.width",
+      "status": "implemented"
+    },
+    {
+      "reference": "deco.type",
+      "recipe": "frame.enabled/style",
+      "status": "implemented"
+    },
+    {
+      "reference": "endDelay",
+      "recipe": "motion.endDelay",
+      "status": "implemented"
+    },
+    {
+      "reference": "fill.color",
+      "recipe": "color",
+      "status": "implemented"
+    },
+    {
+      "reference": "fill.color2",
+      "recipe": "typography.gradientColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "fill.color3",
+      "recipe": "layout.gradientColor3",
+      "status": "implemented"
+    },
+    {
+      "reference": "fill.dir",
+      "recipe": "layout.gradientDirection",
+      "status": "implemented"
+    },
+    {
+      "reference": "fill.type",
+      "recipe": "typography.gradient + layout.gradientThird",
+      "status": "implemented"
+    },
+    {
+      "reference": "fillOpacity",
+      "recipe": "typography.fillOpacity",
+      "status": "implemented"
+    },
+    {
+      "reference": "fontId",
+      "recipe": "layout.font",
+      "status": "implemented"
+    },
+    {
+      "reference": "fontSize",
+      "recipe": "fontSize",
+      "status": "implemented"
+    },
+    {
+      "reference": "glitchColor",
+      "recipe": "layout.glitchColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "glitchColor2",
+      "recipe": "layout.glitchColor2",
+      "status": "implemented"
+    },
+    {
+      "reference": "glow.color",
+      "recipe": "typography.glowColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "glow.size",
+      "recipe": "typography.glow",
+      "status": "implemented"
+    },
+    {
+      "reference": "glow.strength",
+      "recipe": "layout.glowStrength",
+      "status": "implemented"
+    },
+    {
+      "reference": "glyphDur",
+      "recipe": "sequence.glyphDuration",
+      "status": "implemented"
+    },
+    {
+      "reference": "hold",
+      "recipe": "hold",
+      "status": "implemented"
+    },
+    {
+      "reference": "holdFx",
+      "recipe": "typography.holdMotion",
+      "status": "implemented"
+    },
+    {
+      "reference": "holdPower",
+      "recipe": "motion.holdPower",
+      "status": "implemented"
+    },
+    {
+      "reference": "inDir",
+      "recipe": "motion.inDirection",
+      "status": "implemented"
+    },
+    {
+      "reference": "inDur",
+      "recipe": "enter",
+      "status": "implemented"
+    },
+    {
+      "reference": "inEase",
+      "recipe": "motion.inEase",
+      "status": "implemented"
+    },
+    {
+      "reference": "inOrder",
+      "recipe": "typography.order",
+      "status": "implemented"
+    },
+    {
+      "reference": "inPower",
+      "recipe": "motion.inPower",
+      "status": "implemented"
+    },
+    {
+      "reference": "inStagger",
+      "recipe": "motion.inStagger",
+      "status": "implemented"
+    },
+    {
+      "reference": "italic",
+      "recipe": "layout.italic",
+      "status": "implemented"
+    },
+    {
+      "reference": "letterSpacing",
+      "recipe": "typography.spacing (px)",
+      "status": "implemented"
+    },
+    {
+      "reference": "lineHeight",
+      "recipe": "layout.lineHeight",
+      "status": "implemented"
+    },
+    {
+      "reference": "lineInterval",
+      "recipe": "sequence.lineInterval",
+      "status": "implemented"
+    },
+    {
+      "reference": "linePause",
+      "recipe": "sequence.linePause",
+      "status": "implemented"
+    },
+    {
+      "reference": "marginX",
+      "recipe": "layout.marginX",
+      "status": "implemented"
+    },
+    {
+      "reference": "marginY",
+      "recipe": "layout.marginY",
+      "status": "implemented"
+    },
+    {
+      "reference": "offsetX",
+      "recipe": "typography.x",
+      "status": "implemented"
+    },
+    {
+      "reference": "offsetY",
+      "recipe": "typography.y",
+      "status": "implemented"
+    },
+    {
+      "reference": "outDir",
+      "recipe": "motion.outDirection",
+      "status": "implemented"
+    },
+    {
+      "reference": "outDur",
+      "recipe": "exit",
+      "status": "implemented"
+    },
+    {
+      "reference": "outEase",
+      "recipe": "motion.outEase",
+      "status": "implemented"
+    },
+    {
+      "reference": "outOrder",
+      "recipe": "motion.outOrder",
+      "status": "implemented"
+    },
+    {
+      "reference": "outPower",
+      "recipe": "motion.outPower",
+      "status": "implemented"
+    },
+    {
+      "reference": "outStagger",
+      "recipe": "motion.outStagger",
+      "status": "implemented"
+    },
+    {
+      "reference": "pageGap",
+      "recipe": "sequence.pageGap",
+      "status": "implemented"
+    },
+    {
+      "reference": "pageSplit",
+      "recipe": "sequence.pageSplit",
+      "status": "implemented"
+    },
+    {
+      "reference": "punctPause",
+      "recipe": "sequence.punctPause",
+      "status": "implemented"
+    },
+    {
+      "reference": "reveal",
+      "recipe": "sequence.reveal",
+      "status": "implemented"
+    },
+    {
+      "reference": "scrollFade",
+      "recipe": "sequence.scrollFade",
+      "status": "implemented"
+    },
+    {
+      "reference": "scrollSpeed",
+      "recipe": "sequence.scrollSpeed",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.blur",
+      "recipe": "layout.shadowBlur",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.color",
+      "recipe": "layout.shadowColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.opacity",
+      "recipe": "layout.shadowOpacity",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.x",
+      "recipe": "layout.shadowX",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.y",
+      "recipe": "layout.shadowY",
+      "status": "implemented"
+    },
+    {
+      "reference": "soloImpact",
+      "recipe": "sequence.soloImpact",
+      "status": "implemented"
+    },
+    {
+      "reference": "soloPause",
+      "recipe": "sequence.soloPause",
+      "status": "implemented"
+    },
+    {
+      "reference": "soloSize",
+      "recipe": "sequence.soloSize",
+      "status": "implemented"
+    },
+    {
+      "reference": "spreadDur",
+      "recipe": "sequence.spreadDuration",
+      "status": "implemented"
+    },
+    {
+      "reference": "spreadHold",
+      "recipe": "sequence.spreadHold",
+      "status": "implemented"
+    },
+    {
+      "reference": "startDelay",
+      "recipe": "motion.startDelay",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke.color",
+      "recipe": "typography.strokeColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke.width",
+      "recipe": "typography.strokeWidth",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke2.color",
+      "recipe": "layout.stroke2Color",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke2.width",
+      "recipe": "layout.stroke2Width",
+      "status": "implemented"
+    },
+    {
+      "reference": "subColor",
+      "recipe": "typography.subColor",
+      "status": "implemented"
+    },
+    {
+      "reference": "subColorOn",
+      "recipe": "layout.subColorInherited (inverse)",
+      "status": "implemented"
+    },
+    {
+      "reference": "subDelay",
+      "recipe": "motion.subDelay",
+      "status": "implemented"
+    },
+    {
+      "reference": "subFontId",
+      "recipe": "layout.subFont",
+      "status": "implemented"
+    },
+    {
+      "reference": "subFx",
+      "recipe": "motion.subMotion",
+      "status": "implemented"
+    },
+    {
+      "reference": "subGap",
+      "recipe": "layout.subGap",
+      "status": "implemented"
+    },
+    {
+      "reference": "subItalic",
+      "recipe": "layout.subItalic",
+      "status": "implemented"
+    },
+    {
+      "reference": "subLetterSpacing",
+      "recipe": "typography.subSpacing (px)",
+      "status": "implemented"
+    },
+    {
+      "reference": "subPosition",
+      "recipe": "typography.subPosition",
+      "status": "implemented"
+    },
+    {
+      "reference": "subSize",
+      "recipe": "typography.subSize (px)",
+      "status": "implemented"
+    },
+    {
+      "reference": "subText",
+      "recipe": "typography.subText",
+      "status": "implemented"
+    },
+    {
+      "reference": "subWeight",
+      "recipe": "layout.subWeight",
+      "status": "implemented"
+    },
+    {
+      "reference": "sweepDur",
+      "recipe": "sequence.sweepDuration",
+      "status": "implemented"
+    },
+    {
+      "reference": "text",
+      "recipe": "text",
+      "status": "implemented"
+    },
+    {
+      "reference": "weight",
+      "recipe": "layout.weight",
+      "status": "implemented"
+    },
+    {
+      "reference": "wrapChars",
+      "recipe": "sequence.wrapChars",
+      "status": "implemented"
+    },
+    {
+      "reference": "writing",
+      "recipe": "typography.vertical",
+      "status": "implemented"
+    },
+    {
+      "reference": "mode",
+      "recipe": "sequence.mode",
+      "status": "implemented"
+    },
+    {
+      "reference": "inFx",
+      "recipe": "typography.entrance",
+      "status": "implemented"
+    },
+    {
+      "reference": "outFx",
+      "recipe": "typography.departure",
+      "status": "implemented"
+    },
+    {
+      "reference": "outEnabled",
+      "recipe": "motion.outEnabled",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke.on",
+      "recipe": "typography.strokeWidth > 0",
+      "status": "implemented"
+    },
+    {
+      "reference": "stroke2.on",
+      "recipe": "layout.stroke2Width > 0",
+      "status": "implemented"
+    },
+    {
+      "reference": "shadow.on",
+      "recipe": "typography.shadow",
+      "status": "implemented"
+    },
+    {
+      "reference": "glow.on",
+      "recipe": "typography.glow > 0",
+      "status": "implemented"
+    }
+  ]
+}

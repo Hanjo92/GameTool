@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>GameTool — Motion to code</title>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <a class="brand" href="/"
+          ><span class="brand-mark">G<span>↗</span></span
+          >GameTool<span class="version">LAB / 01</span></a
+        >
+        <div class="header-right">
+          <span class="local"><i></i> LOCAL WORKSPACE</span
+          ><button id="new-project" class="quiet">＋ 새 프로젝트</button>
+        </div>
+      </header>
+      <div class="workspace-heading">
+        <div>
+          <div class="eyebrow">MOTION STUDIO</div>
+          <h1>효과 편집기</h1>
+        </div>
+        <div class="heading-note">편집 → 미리보기 → 게임에 적용</div>
+      </div>
+      <nav class="tool-nav" aria-label="레이어 편집">
+        <button class="selected" data-panel="text-panel">
+          Aa <span>텍스트</span></button
+        ><button data-panel="frame-panel">▱ <span>테두리</span></button>
+        <button data-panel="background-panel">▧ <span>배경</span></button>
+        <button data-panel="image-panel">▣ <span>이미지</span></button>
+        <button data-panel="particles-panel">✦ <span>파티클</span></button>
+        <button data-panel="timing-panel">◷ <span>재생 · 화면</span></button
+        ><span class="tool-note">⌘ / Ctrl + Enter 적용</span>
+      </nav>
+      <main>
+        <aside class="library">
+          <div class="section-title">프로젝트 <span>WORKSPACE</span></div>
+          <label class="sr-only" for="projects">저장된 프로젝트</label
+          ><select id="projects"></select
+          ><label class="field"
+            >이름<input id="project-name" maxlength="80"
+          /></label>
+          <p id="save-state" class="save-state">연결 중</p>
+          <section
+            id="project-tools"
+            class="workspace-tools"
+            aria-label="저장과 재사용"
+          >
+            <div class="row">
+              <button
+                id="save-project"
+                type="button"
+                title="저장 (⌘ / Ctrl + S)"
+              >
+                저장</button
+              ><button id="duplicate-project" type="button">
+                프로젝트 복제
+              </button>
+            </div>
+            <details id="history-panel">
+              <summary>저장 이력 · 복원</summary>
+              <p id="history-info" class="hint">
+                최근 30개 저장본을 보관합니다.
+              </p>
+              <label class="field"
+                >이전 저장본<select id="project-history"></select
+              ></label>
+              <p id="history-detail" class="history-detail"></p>
+              <button id="restore-project" type="button">
+                선택한 저장본 복원
+              </button>
+              <p class="hint">
+                복원 전 상태도 이력에 남습니다. 변경 중인 내용은 먼저
+                저장하세요.
+              </p>
+            </details>
+            <details id="user-preset-panel">
+              <summary>내 프리셋 관리</summary>
+              <label class="field"
+                >새 프리셋 이름<input
+                  id="user-preset-name"
+                  maxlength="80"
+                  placeholder="예: 보스 등장 · 붉은 경고"
+              /></label>
+              <button id="save-preset" type="button">
+                현재 효과를 프리셋으로 저장
+              </button>
+              <label class="field"
+                >삭제할 내 프리셋<select id="user-presets"></select
+              ></label>
+              <button id="delete-preset" type="button">
+                선택한 프리셋 삭제
+              </button>
+              <p class="hint">
+                이 작업 공간에 보관합니다. 삭제해도 프로젝트와 원본 소재는
+                유지됩니다.
+              </p>
+            </details>
+          </section>
+          <div class="divider"></div>
+          <div class="section-title">시작점 선택 <span>PRESETS</span></div>
+          <label class="field"
+            >프리셋 검색<input
+              id="preset-search"
+              type="search"
+              placeholder="경고, 세로, 트레일러…" /></label
+          ><label class="field"
+            >프리셋 분류<select id="preset-group">
+              <option value="all">전체</option>
+              <option value="basic">기본</option>
+              <option value="message">메시지</option>
+              <option value="trailer">트레일러</option>
+              <option value="location">장소·시간</option>
+              <option value="user">내 프리셋</option>
+            </select></label
+          >
+          <label class="toggle"
+            ><input id="preset-keep-text" type="checkbox" /><span
+              >프리셋 적용 시 내 문구 유지</span
+            ></label
+          >
+          <p id="preset-count" class="hint">프리셋 불러오는 중…</p>
+          <div id="presets"></div>
+          <div id="preset-empty" class="empty-state" hidden="">
+            <p>조건에 맞는 프리셋이 없어요.</p>
+            <button id="preset-clear" type="button" class="quiet outline">
+              검색 조건 초기화
+            </button>
+          </div>
+          <div class="library-note">
+            <span>⌘</span><strong>에이전트와 함께 작업</strong>
+            <p>MCP로 같은 프로젝트를 조회하고 효과를 수정할 수 있어요.</p>
+            <code>node scripts/mcp.mjs</code>
+          </div>
+        </aside>
+        <section class="stage-column">
+          <div class="stage-toolbar">
+            <div class="target-tabs" role="group" aria-label="출력 환경">
+              <button data-target="flutter">Flutter</button
+              ><button data-target="phaser" class="active">Phaser</button
+              ><button data-target="three">Three.js</button>
+            </div>
+            <span id="runtime-badge" hidden="">PHASER · 3.90</span>
+            <span id="preview-state" class="preview-state">준비 중…</span>
+          </div>
+          <label class="preview-background"
+            >미리보기 배경<select id="backdrop">
+              <option value="transparent">투명 체크무늬</option>
+              <option value="dark">검정</option>
+              <option value="white">흰색</option>
+              <option value="gray">회색</option>
+              <option value="image">이미지</option>
+            </select></label
+          >
+          <label class="preview-background" id="preview-image-field" hidden=""
+            >미리보기 이미지<input
+              id="preview-image"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+          /></label>
+          <div class="stage">
+            <div class="stage-grid"></div>
+            <div class="stage-corner">
+              LIVE PREVIEW <span id="preview-revision"></span>
+            </div>
+            <iframe id="preview" title="생성 코드 실행 미리보기"></iframe>
+            <div id="placeholder">
+              <span class="preview-symbol">Aa</span>
+              <p>효과를 준비하고 있어요</p>
+            </div>
+            <div class="stage-dimensions">
+              960 × 540 <span>LOGICAL PX</span>
+            </div>
+          </div>
+          <div class="playback">
+            <button id="play" title="재생 또는 정지" aria-label="재생">
+              ▶</button
+            ><button
+              id="restart"
+              class="quiet"
+              title="처음으로 (R)"
+              aria-label="처음으로"
+            >
+              ↺</button
+            ><input
+              id="scrub"
+              aria-label="재생 위치"
+              type="range"
+              min="0"
+              max="2.6"
+              step="0.01"
+              value="0.6"
+            /><span id="time">0.60 / 2.60s</span>
+          </div>
+          <div class="timeline">
+            <div class="timeline-label">
+              TIMELINE <span id="duration-label">2.60 SEC</span>
+            </div>
+            <div class="timeline-track">
+              <div id="enter-block">등장</div>
+              <div id="hold-block">유지</div>
+              <div id="exit-block">퇴장</div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div id="status" role="status">로컬 워크스페이스 연결 중…</div>
+            <button id="cancel" class="quiet" hidden="">취소</button
+            ><button
+              id="apply"
+              class="primary"
+              title="저장 후 미리보기 갱신 (⌘ / Ctrl + Enter)"
+            >
+              적용 · 미리보기 <span>↗</span>
+            </button>
+          </div>
+          <details id="code-panel" class="code-panel">
+            <summary>
+              코드 · 내보내기 <span>소스 확인 / 실행 검증 / ZIP</span>
+            </summary>
+            <div class="code-heading">
+              <div>
+                <span class="eyebrow">READY FOR YOUR GAME</span>
+                <h2>생성 코드</h2>
+              </div>
+              <button id="generate" class="quiet outline">코드 생성 ↓</button>
+            </div>
+            <div class="code-meta">
+              <select id="files" aria-label="생성 파일 선택" disabled="">
+                <option>아직 생성된 파일이 없습니다</option></select
+              ><span id="validation">미검증</span>
+            </div>
+            <pre id="code"><code>// 속성을 편집하고 미리보기를 적용하세요.
+// 선택한 환경에서 실행되는 소스가 여기에 나타납니다.</code></pre>
+            <div class="code-bottom">
+              <span id="artifact-info"
+                >소스 · 런타임 · 통합 예제를 함께 생성합니다.</span
+              ><button id="validate" class="quiet" disabled="">실행 검증</button
+              ><button id="download" class="quiet" disabled="">
+                ZIP 다운로드 ↗
+              </button>
+            </div>
+          </details>
+        </section>
+        <aside class="inspector">
+          <div class="section-title">
+            효과 속성 <span id="inspector-section">텍스트</span>
+          </div>
+          <form id="properties">
+            <section id="text-panel" class="inspector-panel">
+              <h3>텍스트 · 타이포그래피</h3>
+              <label class="toggle"
+                ><input id="textVisible" type="checkbox" checked="" /><span
+                  >텍스트 표시</span
+                ></label
+              >
+              <label class="field"
+                >문구<textarea id="text" rows="3" maxlength="6000"></textarea>
+              </label>
+              <div class="row">
+                <label class="field"
+                  >글자 크기<input
+                    id="fontSize"
+                    type="number"
+                    min="8"
+                    max="400" /></label
+                ><label class="field"
+                  >색상
+                  <div class="color-field">
+                    <input id="color" type="color" /><span
+                      id="color-value"
+                    ></span></div
+                ></label>
+              </div>
+              <div class="divider"></div>
+              <label class="field"
+                >모션<select id="effect">
+                  <option value="fade">페이드 · Fade</option>
+                  <option value="slide">슬라이드 · Slide</option>
+                  <option value="pop">확대 · Pop</option>
+                </select></label
+              ><label class="field"
+                >이동 거리 <span>px</span
+                ><input id="distance" type="number" min="0" max="400"
+              /></label>
+              <details open="" class="typography-controls">
+                <summary>컷인 · 타이포그래피</summary>
+                <label class="toggle"
+                  ><input
+                    id="typography-enabled"
+                    data-group="typography"
+                    data-key="enabled"
+                    type="checkbox"
+                  /><span>컷인 스타일 사용</span></label
+                ><label class="field"
+                  >서브 문구<input
+                    id="typography-subText"
+                    data-group="typography"
+                    data-key="subText"
+                    type="text"
+                    maxlength="160" /></label
+                ><label class="toggle"
+                  ><input
+                    id="typography-serif"
+                    data-group="typography"
+                    data-key="serif"
+                    type="checkbox"
+                  /><span>명조 글꼴 · Serif</span></label
+                ><label class="field"
+                  >서브 크기<input
+                    id="typography-subSize"
+                    data-group="typography"
+                    data-key="subSize"
+                    type="number"
+                    min="8"
+                    max="100" /></label
+                ><label class="field"
+                  >메인 자간<input
+                    id="typography-spacing"
+                    data-group="typography"
+                    data-key="spacing"
+                    type="number"
+                    min="0"
+                    max="60" /></label
+                ><label class="field"
+                  >서브 자간<input
+                    id="typography-subSpacing"
+                    data-group="typography"
+                    data-key="subSpacing"
+                    type="number"
+                    min="0"
+                    max="30" /></label
+                ><label class="field"
+                  >서브 위치<select
+                    id="typography-subPosition"
+                    data-group="typography"
+                    data-key="subPosition"
+                  >
+                    <option value="below">아래</option>
+                    <option value="above">위</option>
+                  </select></label
+                ><label class="field"
+                  >등장<select
+                    id="typography-entrance"
+                    data-group="typography"
+                    data-key="entrance"
+                  ></select></label
+                ><label class="field"
+                  >퇴장<select
+                    id="typography-departure"
+                    data-group="typography"
+                    data-key="departure"
+                  ></select></label
+                ><label class="field"
+                  >유지 중<select
+                    id="typography-holdMotion"
+                    data-group="typography"
+                    data-key="holdMotion"
+                  ></select></label
+                ><label class="field"
+                  >글자 시간차 비율<input
+                    id="typography-stagger"
+                    data-group="typography"
+                    data-key="stagger"
+                    type="number"
+                    min="0"
+                    max="0.9"
+                    step="0.05" /></label
+                ><label class="field"
+                  >글자 순서<select
+                    id="typography-order"
+                    data-group="typography"
+                    data-key="order"
+                  >
+                    <option value="forward">처음부터</option>
+                    <option value="reverse">끝에서</option>
+                    <option value="center">중앙에서</option>
+                    <option value="edges">양끝에서</option>
+                    <option value="random">랜덤</option>
+                  </select></label
+                ><label class="field"
+                  >글자 시드<input
+                    id="typography-seed"
+                    data-group="typography"
+                    data-key="seed"
+                    type="number"
+                    min="0"
+                    max="2147483645"
+                /></label>
+              </details>
+              <details>
+                <summary>장식 · 배치</summary>
+                <label class="field"
+                  >정렬<select
+                    id="typography-align"
+                    data-group="typography"
+                    data-key="align"
+                  >
+                    <option value="center">중앙</option>
+                    <option value="left">왼쪽</option>
+                    <option value="right">오른쪽</option>
+                  </select></label
+                ><label class="toggle"
+                  ><input
+                    id="typography-vertical"
+                    data-group="typography"
+                    data-key="vertical"
+                    type="checkbox"
+                  /><span>세로쓰기</span></label
+                ><label class="field"
+                  >텍스트 X<input
+                    id="typography-x"
+                    data-group="typography"
+                    data-key="x"
+                    type="number"
+                    min="-1920"
+                    max="1920" /></label
+                ><label class="field"
+                  >텍스트 Y<input
+                    id="typography-y"
+                    data-group="typography"
+                    data-key="y"
+                    type="number"
+                    min="-1080"
+                    max="1920" /></label
+                ><label class="field"
+                  >외곽선 두께<input
+                    id="typography-strokeWidth"
+                    data-group="typography"
+                    data-key="strokeWidth"
+                    type="number"
+                    min="0"
+                    max="16" /></label
+                ><label class="field"
+                  >외곽선 색<input
+                    id="typography-strokeColor"
+                    data-group="typography"
+                    data-key="strokeColor"
+                    type="color" /></label
+                ><label class="field"
+                  >발광 강도<input
+                    id="typography-glow"
+                    data-group="typography"
+                    data-key="glow"
+                    type="number"
+                    min="0"
+                    max="40" /></label
+                ><label class="field"
+                  >발광 색<input
+                    id="typography-glowColor"
+                    data-group="typography"
+                    data-key="glowColor"
+                    type="color" /></label
+                ><label class="toggle"
+                  ><input
+                    id="typography-shadow"
+                    data-group="typography"
+                    data-key="shadow"
+                    type="checkbox"
+                  /><span>그림자</span></label
+                ><label class="toggle"
+                  ><input
+                    id="typography-gradient"
+                    data-group="typography"
+                    data-key="gradient"
+                    type="checkbox"
+                  /><span>그라데이션 채우기</span></label
+                ><label class="field"
+                  >그라데이션 끝 색<input
+                    id="typography-gradientColor"
+                    data-group="typography"
+                    data-key="gradientColor"
+                    type="color" /></label
+                ><label class="field"
+                  >채우기 불투명도<input
+                    id="typography-fillOpacity"
+                    data-group="typography"
+                    data-key="fillOpacity"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label class="field"
+                  >서브 색상<input
+                    id="typography-subColor"
+                    data-group="typography"
+                    data-key="subColor"
+                    type="color" /></label
+                ><label class="field"
+                  >배경 장식<select
+                    id="typography-plate"
+                    data-group="typography"
+                    data-key="plate"
+                  >
+                    <option value="none">없음</option>
+                    <option value="band">가로 띠</option>
+                    <option value="card">카드</option>
+                  </select></label
+                ><label class="field"
+                  >장식 색<input
+                    id="typography-plateColor"
+                    data-group="typography"
+                    data-key="plateColor"
+                    type="color" /></label
+                ><label class="field"
+                  >장식 불투명도<input
+                    id="typography-plateOpacity"
+                    data-group="typography"
+                    data-key="plateOpacity"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                /></label>
+              </details>
+              <label class="field"
+                >내 폰트 등록 (TTF / OTF / WOFF / WOFF2)<input
+                  id="font-file"
+                  type="file"
+                  accept=".ttf,.otf,.woff,.woff2" /></label
+              ><label class="field"
+                >스타일 프리셋<select id="style-presets"></select></label
+              ><label class="field"
+                >그라데이션 프리셋<select id="gradient-presets"></select
+              ></label>
+              <details>
+                <summary>이 컴퓨터에 설치된 폰트</summary>
+                <label class="field"
+                  >폰트 패밀리 이름<input
+                    id="local-font-name"
+                    placeholder="예: Apple SD Gothic Neo" /></label
+                ><button type="button" id="local-font-add">
+                  메인 폰트로 사용
+                </button>
+                <p>
+                  대상 기기에 같은 폰트가 필요합니다. 함께 전달하려면 폰트
+                  파일을 등록하세요.
+                </p>
+              </details>
+              <section id="advanced-text"></section>
+            </section>
+
+            <section id="background-panel" class="layer-panel inspector-panel">
+              <h3>배경 모션</h3>
+              <label class="toggle"
+                ><input
+                  id="background-enabled"
+                  data-group="background"
+                  data-key="enabled"
+                  type="checkbox"
+                /><span>배경 사용</span></label
+              ><label class="field"
+                >이미지<select
+                  id="background-assetId"
+                  data-group="background"
+                  data-key="assetId"
+                >
+                  <option value="">선택 없음 · 색상 배경</option>
+                </select></label
+              ><label class="field"
+                >이미지 맞춤<select
+                  id="background-fit"
+                  data-group="background"
+                  data-key="fit"
+                >
+                  <option value="cover">채우기 · Cover</option>
+                  <option value="contain">전체 표시 · Contain</option>
+                </select></label
+              >
+              <div class="row">
+                <label class="field"
+                  >시작 색<input
+                    id="background-color"
+                    data-group="background"
+                    data-key="color"
+                    type="color" /></label
+                ><label class="field"
+                  >끝 색<input
+                    id="background-endColor"
+                    data-group="background"
+                    data-key="endColor"
+                    type="color"
+                /></label>
+              </div>
+              <label class="field"
+                >모션<select
+                  id="background-motion"
+                  data-group="background"
+                  data-key="motion"
+                >
+                  <option value="none">정지</option>
+                  <option value="zoom-in">줌 인</option>
+                  <option value="zoom-out">줌 아웃</option>
+                  <option value="pan-left">왼쪽 이동</option>
+                  <option value="pan-right">오른쪽 이동</option>
+                  <option value="pan-up">위로 이동</option>
+                  <option value="pan-down">아래로 이동</option>
+                  <option value="shake">흔들림</option>
+                </select></label
+              ><label class="field"
+                >모션 강도<input
+                  id="background-amount"
+                  data-group="background"
+                  data-key="amount"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.01" /></label
+              ><label class="toggle"
+                ><input
+                  id="background-fade"
+                  data-group="background"
+                  data-key="fade"
+                  type="checkbox"
+                /><span>타임라인에 맞춰 페이드</span></label
+              >
+              <label class="field"
+                >이미지 가공<select
+                  id="background-filter"
+                  data-group="background"
+                  data-key="filter"
+                ></select></label
+              ><label class="field"
+                >배경 동작 기준<select
+                  id="background-profile"
+                  data-group="background"
+                  data-key="profile"
+                >
+                  <option value="reference">레퍼런스</option>
+                  <option value="legacy">기존 강도</option>
+                </select></label
+              ><label class="field"
+                >페이드 순서<select
+                  id="background-fadeDirection"
+                  data-group="background"
+                  data-key="fadeDirection"
+                >
+                  <option value="out">이미지 → 색 / 투명</option>
+                  <option value="in">색 / 투명 → 이미지</option>
+                </select></label
+              ><label class="field"
+                >전환 대상<select
+                  id="background-transitionSource"
+                  data-group="background"
+                  data-key="transitionSource"
+                >
+                  <option value="images">여러 이미지</option>
+                  <option value="original-filter">
+                    한 이미지: 원본 → 필터
+                  </option>
+                </select></label
+              >
+              <label class="field"
+                >전환 이미지 (최대 8장)<select
+                  multiple=""
+                  size="4"
+                  id="background-assetIds"
+                  data-group="background"
+                  data-key="assetIds"
+                ></select
+              ></label>
+              <p class="hint">
+                ⌘ / Ctrl 키로 여러 장을 선택하세요. 선택한 이미지가 위에서 아래
+                순서로 전환됩니다.
+              </p>
+              <div class="row">
+                <button type="button" id="sequence-up" class="quiet">
+                  순서 ↑</button
+                ><button type="button" id="sequence-down" class="quiet">
+                  순서 ↓
+                </button>
+              </div>
+            </section>
+            <section id="image-panel" class="layer-panel inspector-panel">
+              <h3>이미지 입력</h3>
+              <p class="hint">
+                PNG · JPEG · WebP / 최대 8 MiB · 16 MP<br />원본을 보존하고
+                실행용 이미지를 함께 내보냅니다.
+              </p>
+              <label class="field"
+                >이미지 가져오기<input
+                  type="file"
+                  id="image-file"
+                  multiple=""
+                  accept="image/png,image/jpeg,image/webp" /></label
+              ><label class="field"
+                >가져올 위치<select id="import-target">
+                  <option value="background">배경 이미지</option>
+                  <option value="image">별도 이미지 레이어</option>
+                </select></label
+              >
+              <p id="asset-status" class="hint"></p>
+              <label class="toggle"
+                ><input
+                  id="image-enabled"
+                  data-group="image"
+                  data-key="enabled"
+                  type="checkbox"
+                /><span>이미지 레이어 사용</span></label
+              ><label class="field"
+                >이미지<select
+                  id="image-assetId"
+                  data-group="image"
+                  data-key="assetId"
+                >
+                  <option value="">선택 없음 · 색상 배경</option>
+                </select></label
+              ><label class="field"
+                >이미지 맞춤<select
+                  id="image-fit"
+                  data-group="image"
+                  data-key="fit"
+                >
+                  <option value="cover">채우기 · Cover</option>
+                  <option value="contain">전체 표시 · Contain</option>
+                </select></label
+              >
+              <div class="row">
+                <label class="field"
+                  >X 위치<input
+                    id="image-x"
+                    data-group="image"
+                    data-key="x"
+                    type="number"
+                    min="-1920"
+                    max="1920" /></label
+                ><label class="field"
+                  >Y 위치<input
+                    id="image-y"
+                    data-group="image"
+                    data-key="y"
+                    type="number"
+                    min="-1080"
+                    max="1920"
+                /></label>
+              </div>
+              <div class="row">
+                <label class="field"
+                  >크기 배율<input
+                    id="image-scale"
+                    data-group="image"
+                    data-key="scale"
+                    type="number"
+                    min="0.05"
+                    max="3"
+                    step="0.05" /></label
+                ><label class="field"
+                  >회전 (도)<input
+                    id="image-rotation"
+                    data-group="image"
+                    data-key="rotation"
+                    type="number"
+                    min="-360"
+                    max="360"
+                /></label>
+              </div>
+              <label class="field"
+                >불투명도<input
+                  id="image-opacity"
+                  data-group="image"
+                  data-key="opacity"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.05"
+              /></label>
+            </section>
+            <section id="particles-panel" class="layer-panel inspector-panel">
+              <h3>파티클</h3>
+              <label class="field"
+                >효과 프리셋<select id="particle-style"></select
+              ></label>
+              <p id="particle-description" class="hint">
+                비·화염·연기·마법·충격파를 선택하고 아래에서 조절하세요.
+              </p>
+
+              <label class="toggle"
+                ><input
+                  id="particles-enabled"
+                  data-group="particles"
+                  data-key="enabled"
+                  type="checkbox"
+                /><span>파티클 사용</span></label
+              >
+              <details class="typography-controls">
+                <summary>입자 기본 설정 · 수량 · 속도</summary>
+                <label class="field"
+                  >기본 모양<select
+                    id="particles-preset"
+                    data-group="particles"
+                    data-key="preset"
+                  >
+                    <option value="snow">눈</option>
+                    <option value="sparks">불꽃</option>
+                    <option value="confetti">색종이</option>
+                  </select></label
+                ><label class="field"
+                  >방출<select
+                    id="particles-emission"
+                    data-group="particles"
+                    data-key="emission"
+                  >
+                    <option value="continuous">계속 방출</option>
+                    <option value="burst">한 번에 방출</option>
+                  </select></label
+                ><label class="field"
+                  >랜덤 시드<input
+                    id="particles-seed"
+                    data-group="particles"
+                    data-key="seed"
+                    type="number"
+                    min="0"
+                    max="2147483645" /></label
+                ><label class="field"
+                  >최대 입자 수<input
+                    id="particles-count"
+                    data-group="particles"
+                    data-key="count"
+                    type="number"
+                    min="1"
+                    max="500" /></label
+                ><label class="field"
+                  >입자 크기 (px)<input
+                    id="particles-size"
+                    data-group="particles"
+                    data-key="size"
+                    type="number"
+                    min="1"
+                    max="80" /></label
+                ><label class="field"
+                  >속도 (px/s)<input
+                    id="particles-speed"
+                    data-group="particles"
+                    data-key="speed"
+                    type="number"
+                    min="0"
+                    max="1000" /></label
+                ><label class="field"
+                  >입자 수명 (초)<input
+                    id="particles-lifetime"
+                    data-group="particles"
+                    data-key="lifetime"
+                    type="number"
+                    min="0.1"
+                    max="30"
+                    step="0.1" /></label
+                ><label class="field"
+                  >중력 (px/s²)<input
+                    id="particles-gravity"
+                    data-group="particles"
+                    data-key="gravity"
+                    type="number"
+                    min="-1000"
+                    max="1000" /></label
+                ><label class="field"
+                  >퍼짐 (도) / 눈 흔들림<input
+                    id="particles-spread"
+                    data-group="particles"
+                    data-key="spread"
+                    type="number"
+                    min="0"
+                    max="360" /></label
+                ><label class="field"
+                  >방출 X (0–1)<input
+                    id="particles-x"
+                    data-group="particles"
+                    data-key="x"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label class="field"
+                  >방출 Y (0–1)<input
+                    id="particles-y"
+                    data-group="particles"
+                    data-key="y"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label class="field"
+                  >입자 색상<input
+                    id="particles-color"
+                    data-group="particles"
+                    data-key="color"
+                    type="color"
+                /></label>
+                <p class="hint">
+                  같은 시드와 시간에는 같은 모양과 잔광이 재현됩니다. 고급
+                  설정을 끄면 기존 눈·불꽃·색종이 동작을 사용합니다.
+                </p>
+              </details>
+              <section id="particle-advanced"></section>
+            </section>
+            <section id="frame-panel" class="layer-panel inspector-panel">
+              <h3>테두리 · 바깥 장식</h3>
+              <details open="" class="typography-controls">
+                <summary>바깥 프레임 · 테두리 등장</summary>
+                <label class="toggle"
+                  ><input
+                    id="frame-enabled"
+                    data-group="frame"
+                    data-key="enabled"
+                    type="checkbox"
+                  />프레임 사용</label
+                ><label class="field"
+                  >프레임 형태<select
+                    id="frame-style"
+                    data-group="frame"
+                    data-key="style"
+                  >
+                    <option value="title">타이틀 틀</option>
+                    <option value="box">텍스트 박스</option>
+                    <option value="corners">코너 틀</option>
+                  </select></label
+                ><label class="field"
+                  >프레임 애니메이션<select
+                    id="frame-animation"
+                    data-group="frame"
+                    data-key="animation"
+                  >
+                    <option value="draw">한 획씩 그리기</option>
+                    <option value="fade">페이드</option>
+                    <option value="none">없음</option>
+                  </select></label
+                ><label class="field"
+                  >테두리 등장 시간 (초)<input
+                    id="frame-duration"
+                    data-group="frame"
+                    data-key="duration"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.05" /></label
+                ><label class="field"
+                  >글자 등장 지연 (초)<input
+                    id="frame-textDelay"
+                    data-group="frame"
+                    data-key="textDelay"
+                    type="number"
+                    min="0"
+                    max="3"
+                    step="0.05" /></label
+                ><label class="field"
+                  >테두리 색<input
+                    id="frame-color"
+                    data-group="frame"
+                    data-key="color"
+                    type="color" /></label
+                ><label class="field"
+                  >테두리 두께 (px)<input
+                    id="frame-width"
+                    data-group="frame"
+                    data-key="width"
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.5" /></label
+                ><label class="field"
+                  >프레임 배경색<input
+                    id="frame-fillColor"
+                    data-group="frame"
+                    data-key="fillColor"
+                    type="color" /></label
+                ><label class="field"
+                  >프레임 배경 불투명도<input
+                    id="frame-fillOpacity"
+                    data-group="frame"
+                    data-key="fillOpacity"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05" /></label
+                ><label class="field"
+                  >글자 여백 (em)<input
+                    id="frame-padding"
+                    data-group="frame"
+                    data-key="padding"
+                    type="number"
+                    min="0"
+                    max="3"
+                    step="0.01" /></label
+                ><label class="field"
+                  >타이틀 틀 확장 (em)<input
+                    id="frame-extend"
+                    data-group="frame"
+                    data-key="extend"
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.1" /></label
+                ><label class="field"
+                  >화면 가장자리 여백 (px)<input
+                    id="frame-inset"
+                    data-group="frame"
+                    data-key="inset"
+                    type="number"
+                    min="0"
+                    max="200"
+                    step="1"
+                /></label>
+              </details>
+              <details class="typography-controls">
+                <summary>장식 세부 설정</summary>
+                <label class="toggle"
+                  ><input
+                    id="frame-outline"
+                    data-group="frame"
+                    data-key="outline"
+                    type="checkbox"
+                  />장식에도 이중 외곽선</label
+                ><label class="field"
+                  >띠 가장자리 흐림<input
+                    id="frame-softness"
+                    data-group="frame"
+                    data-key="softness"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01" /></label
+                ><label class="field"
+                  >띠 양 끝 페이드<input
+                    id="frame-sideFade"
+                    data-group="frame"
+                    data-key="sideFade"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01" /></label
+                ><label class="field"
+                  >박스 모서리 반경 (em)<input
+                    id="frame-radius"
+                    data-group="frame"
+                    data-key="radius"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01" /></label
+                ><label class="field"
+                  >경고 테이프 색<input
+                    id="frame-tapeColor"
+                    data-group="frame"
+                    data-key="tapeColor"
+                    type="color" /></label
+                ><label class="field"
+                  >경고 줄무늬 색<input
+                    id="frame-tapeStripe"
+                    data-group="frame"
+                    data-key="tapeStripe"
+                    type="color" /></label
+                ><label class="field"
+                  >경고 테이프 굵기<input
+                    id="frame-tapeSize"
+                    data-group="frame"
+                    data-key="tapeSize"
+                    type="number"
+                    min="8"
+                    max="120"
+                    step="1" /></label
+                ><label class="field"
+                  >경고 테이프 속도<input
+                    id="frame-tapeSpeed"
+                    data-group="frame"
+                    data-key="tapeSpeed"
+                    type="number"
+                    min="0"
+                    max="400"
+                    step="5" /></label
+                ><label class="field"
+                  >경고 테이프 점멸<input
+                    id="frame-tapeBlink"
+                    data-group="frame"
+                    data-key="tapeBlink"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                /></label>
+              </details>
+            </section>
+            <section id="timing-panel" class="layer-panel inspector-panel">
+              <h3>재생 · 화면 크기</h3>
+              <p class="hint">
+                등장·유지·퇴장의 길이와 출력 캔버스를 설정하세요. 글자별 세부
+                타이밍은 텍스트 탭에서 조절할 수 있어요.
+              </p>
+              <div class="timing-fields">
+                <label class="field"
+                  >등장<input
+                    id="enter"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1" /></label
+                ><label class="field"
+                  >유지<input
+                    id="hold"
+                    type="number"
+                    min="0"
+                    max="30"
+                    step="0.1" /></label
+                ><label class="field"
+                  >퇴장<input
+                    id="exit"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                /></label>
+              </div>
+              <label class="toggle"
+                ><input id="loop" type="checkbox" /><span
+                  >반복 재생</span
+                ></label
+              ><label class="field"
+                >반복 횟수 (0=무한)<input
+                  id="loopCount"
+                  type="number"
+                  min="0"
+                  max="1000"
+                  value="0" /></label
+              ><label class="field"
+                >화면 크기 프리셋<select id="size-preset">
+                  <option value="">사용자 지정</option>
+                  <option>1920x1080</option>
+                  <option>1280x720</option>
+                  <option>960x540</option>
+                  <option>1280x360</option>
+                  <option>1024x256</option>
+                  <option>1080x1080</option>
+                  <option>720x1280</option>
+                </select></label
+              >
+              <div class="row">
+                <label class="field"
+                  >너비<input
+                    id="width"
+                    type="number"
+                    min="240"
+                    max="1920" /></label
+                ><label class="field"
+                  >높이<input id="height" type="number" min="160" max="1920"
+                /></label>
+              </div>
+              <p class="hint">
+                중앙 정렬 · 논리 픽셀 기준<br />실행 환경에 따라 글꼴 모양은
+                달라질 수 있어요.
+              </p>
+            </section>
+          </form>
+          <button type="button" id="settings-reset">
+            저장된 설정으로 되돌리기
+          </button>
+          <div class="output-note">
+            <span>↳</span> 이미지가 아닌, 수정 가능한<br /><strong
+              >런타임 코드</strong
+            >를 생성합니다.
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <span>GAMETOOL / LOCAL CREATIVE TOOLS</span
+        ><span>MOTION STUDIO · V0.4 <i></i> NO CLOUD REQUIRED</span>
+      </footer>
+    </div>
+
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
