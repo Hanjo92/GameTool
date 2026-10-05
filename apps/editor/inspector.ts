@@ -7,6 +7,13 @@ export function setupInspector() {
   );
   const nav = document.querySelector<HTMLElement>(".tool-nav")!;
   nav.setAttribute("role", "tablist");
+  // Horizontal reveal preserves the document scroll position on narrow screens.
+  function reveal(tab: HTMLButtonElement) {
+    const bounds = nav.getBoundingClientRect();
+    const item = tab.getBoundingClientRect();
+    if (item.left < bounds.left) nav.scrollLeft += item.left - bounds.left;
+    else if (item.right > bounds.right) nav.scrollLeft += item.right - bounds.right;
+  }
   function select(tab: HTMLButtonElement, focus = false) {
     for (const candidate of tabs) {
       const selected = candidate === tab;
@@ -17,7 +24,8 @@ export function setupInspector() {
     }
     $("inspector-section").textContent = tab.querySelector("span")!.textContent;
     document.querySelector(".inspector")!.scrollTop = 0;
-    if (focus) tab.focus();
+    if (focus) tab.focus({ preventScroll: true });
+    reveal(tab);
   }
   tabs.forEach((tab, index) => {
     tab.type = "button";
@@ -52,4 +60,8 @@ export function setupInspector() {
     };
   });
   select(tabs[0]);
+  new ResizeObserver(() => {
+    const active = tabs.find((tab) => tab.getAttribute("aria-selected") === "true");
+    if (active) reveal(active);
+  }).observe(nav);
 }

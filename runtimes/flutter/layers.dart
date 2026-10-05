@@ -405,15 +405,19 @@ Map<String, dynamic> sceneSnapshot(EffectRecipe r, double seconds) => {
 };
 
 /// Caller owns the returned images and must dispose them after the widget unmounts.
-Future<Map<String, ui.Image>> loadSceneImages(EffectRecipe r) async {
+Future<Map<String, ui.Image>> loadSceneImages(
+  EffectRecipe r, {
+  String assetPrefix = 'assets/images/',
+}) async {
   final images = <String, ui.Image>{};
   try {
     for (final id in {
       ...backgroundAssetIds(r),
       r.background['assetId'],
       r.image['assetId'],
+      ...(r.studio['nodes'] as List? ?? []).map((n) => n['assetId']),
     }.whereType<String>()) {
-      final bytes = await rootBundle.load('assets/images/$id.png');
+      final bytes = await rootBundle.load('$assetPrefix$id.png');
       final codec = await ui.instantiateImageCodec(
         bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes),
       );

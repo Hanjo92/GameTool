@@ -1,4 +1,9 @@
-import { particleFields, particleStyles } from "../../runtimes/shared/particle-options.js";
+import { measurePreview } from "./profiling.js";
+import { defaultStudioQuality } from "../../runtimes/shared/studio-types.js";
+import {
+  particleFields,
+  particleStyles,
+} from "../../runtimes/shared/particle-options.js";
 import { optionGroups } from "../../runtimes/shared/options.js";
 import {
   stylePresets,
@@ -101,7 +106,7 @@ export async function toolchains() {
   } catch {}
   return {
     schemaVersion: 1,
-    generatorVersion: "0.4.0",
+    generatorVersion: "0.5.0",
     workspaceFeatures: {
       projectDuplicate: true,
       savedHistoryLimit: 30,
@@ -156,6 +161,46 @@ export async function toolchains() {
     particlePresets: ["snow", "sparks", "confetti"],
     particleStyles,
     particleFields,
+    studio: {
+      optionalRecipeField: "studio",
+      maxNodes: 64,
+      maxVariants: 24,
+      nodes: ["group", "text", "image", "particles", "ui"],
+      widgets: ["button", "health-bar", "cooldown", "toast", "item-card"],
+      properties: ["x", "y", "scale", "rotation", "opacity", "value"],
+      bindings: [
+        "text",
+        "value",
+        "x",
+        "y",
+        "opacity",
+        "visible",
+        "state",
+        "color",
+      ],
+      uiStates: ["normal", "pressed", "selected", "disabled"],
+      particleFeatures: [
+        "multiple-emitters",
+        "sprite-sheet",
+        "lifetime-curves",
+        "data-target-follow",
+      ],
+      events: {
+        seek: "silent",
+        forwardPlayback: "crossed events",
+        payload: "scalar data",
+      },
+      defaultQuality: defaultStudioQuality,
+      targetExtensions: {
+        flutter: ["widget", "optional-flame-adapter"],
+        phaser: ["scene-component", "target-follow"],
+        three: ["screen", "world", "billboard", "optional-instanced-sprites"],
+      },
+      integration:
+        "opt-in CLI --integration-root; plan before apply; preserve hand edits",
+      profiling:
+        "measured local Chromium frame intervals; texture/particle figures are estimates",
+    },
     deferred: [],
     renderer: "actual generated code",
     validation: "per artifact",
@@ -166,6 +211,7 @@ export class LocalProduction implements Production {
   constructor(
     private dataRoot: string,
     private baseUrl: () => string,
+    private measure: typeof measurePreview = measurePreview,
   ) {}
   async create(
     project: Project,
@@ -199,7 +245,7 @@ export class LocalProduction implements Production {
         directory: dir,
         files: Object.keys(files),
         hashes,
-        generatorVersion: "0.4.0",
+        generatorVersion: "0.5.0",
         sdk: versions[target],
         recipeHash: createHash("sha256")
           .update(JSON.stringify(project.recipe))
@@ -213,6 +259,25 @@ export class LocalProduction implements Production {
     } catch (e) {
       await rm(temp, { recursive: true, force: true });
       throw e;
+    }
+  }
+  async profile(artifact: Artifact, frames: number, signal: AbortSignal) {
+    if (this.busy.has(artifact.id))
+      throw new AppError("ARTIFACT_BUSY", "Artifact is already in use");
+    this.busy.add(artifact.id);
+    try {
+      await this.compile(artifact, signal, false);
+      const recipe = JSON.parse(
+        await readFile(join(artifact.directory, "recipe.json"), "utf8"),
+      );
+      return await this.measure({
+        url: new URL(`/preview/${artifact.id}/`, this.baseUrl()).href,
+        recipe,
+        frames,
+        signal,
+      });
+    } finally {
+      this.busy.delete(artifact.id);
     }
   }
   private async verify(artifact: Artifact) {

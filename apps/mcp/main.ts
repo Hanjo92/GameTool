@@ -52,22 +52,43 @@ if (!service)
   throw new Error(
     "Cannot start local service. Run npm run build and npm start first.",
   );
-const server = new McpServer({ name: "gametool", version: "0.4.0" });
+const server = new McpServer({ name: "gametool", version: "0.5.0" });
 const descriptions: Record<string, string> = {
+  studio_variants:
+    "Validate all named recipe patches and show diffs; save=true creates all independent variants atomically. Requires current revision.",
+  recipe_diff:
+    "Compare a validated draft recipe against an exact saved revision without saving.",
+  studio_compare:
+    "Numerically sample the base and variants at absolute times; not a rendered image comparison.",
+  studio_comparison_start:
+    "Render base and up to six draft variants in an actual target runtime. Poll job_get.comparisons for artifacts and preview URLs.",
+  integration_roots:
+    "List operator-configured host project destinations; no arbitrary paths are accepted over MCP.",
+  integration_plan:
+    "Prepare a generated-only file change plan for an allowed host root and effect ID; preserves unrelated host files.",
+  integration_apply:
+    "Apply a reviewed planId with its expectedHash; fails if destination or generated ownership changed. Writes to an explicitly configured host project root.",
+  performance_start:
+    "Measure 30–600 frames of a generated artifact in local Chromium. Poll job_get.profileReport. Host measurements are not mobile/GPU benchmarks.",
   assets_list: "List imported local image and font assets and IDs.",
   asset_import:
     "Import PNG/JPEG/WebP images (8 MiB, 16 MP) or TTF/OTF/WOFF/WOFF2 fonts (32 MiB) as base64. Preserves original; returns asset ID for background/image layers or layout.font/layout.subFont. Never reads arbitrary paths.",
   capabilities_get: "Report implemented effects and local SDK availability.",
   presets_list: "List text, background and particle presets.",
-  preset_save: "Save an immutable user preset from an exact project revision, including asset references. Local workspace only.",
-  preset_delete: "Delete a user preset by UUID. Does not change projects, built-in presets or assets.",
+  preset_save:
+    "Save an immutable user preset from an exact project revision, including asset references. Local workspace only.",
+  preset_delete:
+    "Delete a user preset by UUID. Does not change projects, built-in presets or assets.",
   projects_list: "List saved local projects.",
   project_create: "Create a layered effect project.",
   project_get: "Read the current project revision.",
   project_update: "Save validated recipe; reject stale revisions.",
-  project_duplicate: "Copy an exact project revision into a new independent project, sharing immutable local assets.",
-  project_history: "Read the previous 30 saved snapshots, newest first, and current revision. Older pre-feature history is unavailable.",
-  project_restore: "Restore a retained snapshot as a NEW revision; preserve current state in history. Requires expectedRevision.",
+  project_duplicate:
+    "Copy an exact project revision into a new independent project, sharing immutable local assets.",
+  project_history:
+    "Read the previous 30 saved snapshots, newest first, and current revision. Older pre-feature history is unavailable.",
+  project_restore:
+    "Restore a retained snapshot as a NEW revision; preserve current state in history. Requires expectedRevision.",
   code_generate:
     "Generate standalone Flutter, Phaser or Three.js code. Returns a job ID.",
   preview_start:
@@ -94,8 +115,11 @@ for (const [name, schema] of Object.entries(inputs)) {
           "project_history",
           "job_get",
           "artifact_get",
+          "recipe_diff",
+          "studio_compare",
+          "integration_roots",
         ].includes(name),
-        destructiveHint: name === "preset_delete",
+        destructiveHint: ["preset_delete", "integration_apply"].includes(name),
         openWorldHint: false,
       },
     },
@@ -110,6 +134,9 @@ for (const [name, schema] of Object.entries(inputs)) {
         "project_history",
         "job_get",
         "artifact_get",
+        "recipe_diff",
+        "studio_compare",
+        "integration_roots",
       ].includes(name);
       for (let attempt = 0; attempt < (readOnly ? 3 : 1); attempt++) {
         try {

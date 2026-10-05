@@ -1,3 +1,4 @@
+import type { Studio } from "./studio-types.js";
 import { defaultParticleOptions, type ParticleOptions } from "./particle-options.js";
 import {
   precise,
@@ -18,6 +19,7 @@ import {
 /** Portable logical-pixel timeline. Exported verbatim with generated TypeScript. */
 export interface Recipe {
   schemaVersion: 1;
+  studio?: Studio;
   textVisible?: boolean;
   typography?: Typography;
   layout?: LayoutOptions;
@@ -41,8 +43,8 @@ export interface Recipe {
   loop: boolean;
   loopCount?: number;
 }
-export const duration = (r: Recipe) =>
-  precise(r) ? timelineFor(r).duration : r.enter + r.hold + r.exit;
+export const legacyDuration = (r: Recipe) => precise(r) ? timelineFor(r).duration : r.enter + r.hold + r.exit;
+export const duration = (r: Recipe) => Math.max(legacyDuration(r), r.studio?.enabled ? r.studio.duration : 0);
 export function evaluate(r: Recipe, seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0)
     throw new Error("Time must be finite and non-negative");
@@ -57,7 +59,7 @@ export function evaluate(r: Recipe, seconds: number) {
       : t < r.enter + r.hold
         ? 1
         : r.exit > 0
-          ? Math.max(0, (d - t) / r.exit)
+          ? Math.max(0, (legacyDuration(r) - t) / r.exit)
           : 0;
   if (precise(r)) {
     const { page, active } = pageAt(r, seconds),
@@ -94,6 +96,9 @@ export class Playback {
   time = 0;
   playing = false;
   private rate = 1;
+  private transportListeners = new Set<(kind: 'advance' | 'seek' | 'restart', previous: number, time: number) => void>();
+  onTransport(listener: (kind: 'advance' | 'seek' | 'restart', previous: number, time: number) => void) { this.transportListeners.add(listener); return () => this.transportListeners.delete(listener); }
+  private emitTransport(kind: 'advance' | 'seek' | 'restart', previous: number) { for (const listener of this.transportListeners) listener(kind, previous, this.time); }
   constructor(public recipe: Recipe) {}
   get speed() {
     return this.rate;
@@ -105,7 +110,9 @@ export class Playback {
   }
   seek(seconds: number) {
     evaluate(this.recipe, seconds);
+    const previous = this.time;
     this.time = seconds;
+    this.emitTransport('seek', previous);
     return this.state;
   }
   play() {
@@ -115,13 +122,16 @@ export class Playback {
     this.playing = false;
   }
   restart() {
+    const previous = this.time;
     this.time = 0;
+    this.emitTransport('restart', previous);
     this.play();
   }
   advance(deltaSeconds: number) {
     if (!Number.isFinite(deltaSeconds) || deltaSeconds < 0)
       throw new Error("Invalid delta");
     if (this.playing) {
+      const previous = this.time;
       this.time += deltaSeconds * this.rate;
       if (
         (!this.recipe.loop || !!this.recipe.loopCount) &&
@@ -134,6 +144,7 @@ export class Playback {
           (this.recipe.loop ? (this.recipe.loopCount ?? 1) : 1);
         this.pause();
       }
+      this.emitTransport('advance', previous);
     }
     return this.state;
   }
@@ -552,6 +563,7 @@ export function assetIds(r: Recipe) {
         ...backgroundAssetIds(r),
         r.background?.assetId,
         r.image?.assetId,
+        ...(r.studio?.nodes.map(n => n.assetId) ?? []),
       ].filter((id): id is string => !!id),
     ),
   ];

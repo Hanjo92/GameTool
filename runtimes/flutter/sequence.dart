@@ -212,11 +212,15 @@ TextTimeline timelineFor(EffectRecipe r) {
   double seconds,
 ) {
   final timeline = timelineFor(r),
-      t =
-          r.loop &&
-              (r.loopCount == 0 || seconds < timeline.duration * r.loopCount)
-          ? seconds % timeline.duration
-          : math.min(seconds, timeline.duration);
+      loopDuration = math.max(
+        timeline.duration,
+        r.studio['enabled'] == true
+            ? (r.studio['duration'] as num).toDouble()
+            : 0.0,
+      ),
+      t = r.loop && (r.loopCount == 0 || seconds < loopDuration * r.loopCount)
+          ? seconds % loopDuration
+          : math.min(seconds, loopDuration);
   var index = timeline.pages.indexWhere((p) => t >= p.start && t <= p.end);
   final keep =
       r.motion['outEnabled'] == false || r.typography['departure'] == 'none';

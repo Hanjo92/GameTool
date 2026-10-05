@@ -16,11 +16,12 @@ import {
 } from "./motion.js";
 export async function loadImages(
   recipe: Recipe,
+  baseUrl = "assets/images/",
 ): Promise<Map<string, HTMLImageElement | HTMLCanvasElement>> {
   const entries = await Promise.all(
     assetIds(recipe).map(async (id) => {
       const image = new Image();
-      image.src = `assets/images/${id}.png`;
+      image.src = `${baseUrl}${id}.png`;
       await image.decode();
       return [id, image] as const;
     }),

@@ -1,11 +1,11 @@
-# MCP 계약 — v0.4
+# MCP 계약 — v0.5
 
 stdio MCP와 GUI가 `packages/core/application.ts`의 같은 명령·입력 스키마를 사용한다. 클라이언트는 `tools/list`에서 정확한 제한과 enum을 조회한다.
 
 | 도구 | 입력 | 결과 |
 | --- | --- | --- |
 | `capabilities_get` | `{}` | 지원 모션·필터·88개 폰트·파티클 10개 스타일/28개 고급 필드·옵션 메타데이터·스타일/그라데이션·SDK 상태 |
-| `presets_list` | `{}` | 기본 90개 + 내 프리셋(`group: user`) |
+| `presets_list` | `{}` | 기본 93개 + 내 프리셋(`group: user`) |
 | `preset_save` | projectId, expectedRevision, name | 해당 저장본을 독립적인 내 프리셋으로 보관 |
 | `preset_delete` | presetId(UUID) | 내 프리셋만 삭제; 프로젝트·소재 보존 |
 | `assets_list` | `{}` | 이미지/폰트 ID, kind, 이름, 크기/패밀리, 원본/실행용 hash |
@@ -23,12 +23,21 @@ stdio MCP와 GUI가 `packages/core/application.ts`의 같은 명령·입력 스�
 | `job_get` | jobId | 상태, artifactId, 오류; 완료 미리보기는 PNG content 포함 |
 | `job_cancel` | jobId | 취소 요청 여부 |
 | `artifact_get` | artifactId, 선택적 file | manifest 또는 텍스트 소스 |
+| `studio_variants` | projectId, expectedRevision, variants[{name,patch}], save=false | 전체 검증 후 recipe·diff 반환; save=true는 독립 프로젝트 일괄 저장 |
+| `recipe_diff` | projectId, expectedRevision, recipe | JSON Pointer 경로별 변경 |
+| `studio_compare` | projectId, expectedRevision, variants=[], times | 원본·변형의 시간별 수치 샘플 |
+| `studio_comparison_start` | projectId, expectedRevision, variants, target, timeSeconds | 실제 생성·미리보기 작업; job.comparisons에 결과 |
+| `integration_roots` | {} | CLI에서 허용한 폴더의 ID·이름 |
+| `integration_plan` | artifactId, rootId, effectId | planId, expectedHash, 파일 변경·경고 |
+| `integration_apply` | planId, expectedHash | 계획 재검증 후 생성물 전용 디렉터리에 적용 |
+| `performance_start` | artifactId, frames=120 | 실제 브라우저 측정 작업; job.profileReport에 결과 |
+
 
 `target`: flutter / phaser / three. 바이너리 이미지·폰트는 생성 디렉터리 및 GUI ZIP에 포함된다. `artifact_get`은 바이너리를 텍스트로 해석하지 않는다.
 
 ## 재사용과 복구
 
-총 19개 도구다. `project_create.presetId`는 `presets_list`에서 받은 기본 ID 또는 내 프리셋 UUID를 받는다. 없는 ID는 NOT_FOUND이며 기본값으로 조용히 바꾸지 않는다. `capabilities_get.workspaceFeatures`에서 이력 한도와 재사용 기능을 조회한다.
+총 27개 도구다. `project_create.presetId`는 `presets_list`에서 받은 기본 ID 또는 내 프리셋 UUID를 받는다. 없는 ID는 NOT_FOUND이며 기본값으로 조용히 바꾸지 않는다. `capabilities_get.workspaceFeatures`에서 이력 한도와 재사용 기능을 조회한다.
 
 프로젝트 수정과 복원은 이전 상태를 최대 30개 보관한다. 현재 상태와 이력은 한 파일에 원자적으로 저장한다. 복원은 revision을 되돌리지 않고 새 번호를 부여하며, 복원 직전 상태도 이력에 남긴다. 도입 이전 저장본은 소급 생성하지 않는다. 첫 수정 시 현재 저장본부터 보관한다. 이력 한도를 벗어난 revision은 NOT_FOUND다.
 
@@ -83,3 +92,17 @@ schemaVersion=1 기존 텍스트 프로젝트는 새 레이어가 꺼진 기본�
 생성과 검증은 별개다. 생성만 하면 validation=not_run. code_validate는 소스·자산 hash, 정적 분석, 빌드, 실제 브라우저 실행, 시간별 배경/입자/문자 수치, 외부 요청·HTTP 오류를 검사한다. Flutter는 생성한 fixture·widget test도 실행한다. 변경된 출력은 ARTIFACT_CHANGED, 변경된 원본 보관 실행 이미지는 ASSET_CHANGED, 없는 소재는 ASSET_NOT_FOUND다.
 
 MCP stdout은 프로토콜 전용이다. `node scripts/mcp.mjs`를 사용한다. 클라이언트 설정은 자동 변경하지 않는다. service.json의 연결 토큰은 로그/소스 관리에 포함하지 않는다.
+
+## Studio와 배치 계약
+
+`recipe.studio`는 선택적이며 기존 schemaVersion=1 프로젝트는 변경 없이 유효하다. `studio`에는 enabled/duration/nodes/bindings/events/data/quality/space/worldScale/billboard가 있다. DTO는 `runtimes/shared/studio-types.ts`, 엄격한 검증은 `packages/core/studio-schema.ts`가 기준이다.
+
+노드는 group/text/image/particles/ui이며 최대 64개다. parentId는 존재하는 group만 참조하고 순환은 금지한다. x/y는 중심 기준 논리 픽셀(자식은 부모 로컬), rotation은 도, start/duration과 keyframe.time은 초다. 트랙은 x/y/scale/rotation/opacity/value, 노드당 속성별 하나·키 최대 32개다. 키 시간은 노드 로컬이고 정렬·중복 금지이며 duration을 넘을 수 없다. UI에는 widget, 파티클에는 particles, 활성 이미지에는 assetId가 필요하다.
+
+bindings는 최대 128개이고 text/value/x/y/opacity/visible/state/color를 스칼라 data에 연결한다. events는 최대 128개이고 이름·시점·스칼라 payload만 제공한다. 임의 스크립트는 실행하지 않는다. seek는 조용하며 재생이 통과한 이벤트만 전달한다. 커다란 시간 이동의 이벤트 재생은 최근 256주기로 제한한다.
+
+variants는 1~24개(실제 화면 비교는 1~6개), 중첩 객체는 병합하고 배열은 전체 교체한다. 모든 변형의 스키마·소재를 먼저 확인한다. save=true는 원본을 수정하지 않고 새 프로젝트들을 하나의 batch manifest에 원자적으로 저장한다. 비교 시각은 최대 16개다. 수치 비교는 기존 글자·입자의 개수와 각각 앞 3개 표본(`glyphCount/glyphSample`, `particleCount/particleSample`), Studio 노드별 앞 3개 입자를 반환한다. 화면 비교를 대체하지 않는다.
+
+품질은 low/medium/high, reducedMotion, particleBudget(0~5000), instances(1~32), fpsTarget(15~240)이다. 성능 측정은 30프레임 워밍업 후 30~600프레임을 수집한다. 브라우저 스케줄러/동기 CPU 측정과 텍스처·입자 추정을 분리하며 실제 GPU 메모리·실기기 성능은 측정하지 않는다.
+
+통합은 서비스 CLI `--integration-root`로 허용한 기존 루트만 사용한다. HTTP/MCP로 임의 절대 경로를 입력할 수 없다. effectId는 소문자 영숫자로 시작하는 1~64자의 영숫자·밑줄·하이픈이다. 계획은 메모리에 있으며 재시작하면 다시 만들어야 한다. 계획 이후 변경·기존 소유 파일 편집·경로 이탈·링크는 적용 전에 차단한다. 호스트 의존성 파일과 비소유 파일은 보존한다.

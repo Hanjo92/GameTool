@@ -1,3 +1,4 @@
+import { LocalIntegration } from "./integration.js";
 import { LocalAssets } from "./assets.js";
 import { createServer } from "node:http";
 import { mkdir, open, readFile, rm, stat } from "node:fs/promises";
@@ -15,6 +16,17 @@ const arg = (key: string, fallback: string) => {
   const i = args.indexOf(key);
   return i >= 0 ? args[i + 1] : fallback;
 };
+const integrationRoots = args.flatMap((value, index) => {
+  if (value !== "--integration-root") return [];
+  const path = args[index + 1];
+  if (!path || path.startsWith("--"))
+    throw new Error(
+      "--integration-root requires an existing host project directory",
+    );
+  return [resolve(path)];
+});
+const integration = new LocalIntegration(integrationRoots);
+await integration.roots();
 const workspace = resolve(arg("--workspace", join(repoRoot, ".gametool")));
 const port = Number(arg("--port", "4317"));
 if (!Number.isInteger(port) || port < 0 || port > 65535)
@@ -58,6 +70,7 @@ const app = new Application(
   randomUUID,
   toolchains,
   new LocalAssets(workspace),
+  integration,
 );
 const mime: Record<string, string> = {
   ".html": "text/html; charset=utf-8",

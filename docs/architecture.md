@@ -171,3 +171,11 @@ manifest에는 recipe revision/hash, generator version, target 및 SDK 호환 �
 `editor/controls.ts`는 공용 옵션 메타데이터와 화면용 이름으로 입력 항목을 구성하고, `recipe-form.ts`는 전체 레시피 읽기/채우기와 타임라인 표시를 맡는다. `inspector.ts`는 접근성 속성·방향키 이동·패널 표시만 변경한다. 숨겨진 패널도 레시피 직렬화에 포함하며, 저장은 계속 공통 `project_update`와 revision 검사를 사용한다.
 
 `main.ts`는 서비스 명령, 프로젝트/작업 상태와 실제 런타임 미리보기를 연결한다. 미저장 상태와 미리보기의 프로젝트/revision/target을 구분해 저장만 완료된 상태를 최신 미리보기로 표시하지 않는다. 옵션 스키마, 렌더 수학, MCP 계약과 원본 소재 경계는 변경하지 않는다.
+
+## v0.5 Studio 구현 경계
+
+`studio-types`는 직렬화 DTO, `studio-schema`는 노드 참조·타임라인·예산 검증, `shared/studio`는 결정적 프레임·데이터·이벤트·UI 상태, `studio-painter`는 Canvas 렌더를 소유한다. Flutter `studio.dart`는 같은 fixture를 소비하는 Dart 구현이다. Studio 회전 저장 단위는 도다. 기존 레거시 모션은 별도 기존 duration으로 평가하여 Studio 길이가 레거시 페이드를 바꾸지 않는다.
+
+편집기는 `studio-editor`, `edit-history`, `studio-workflows`로 나뉜다. Core의 순수 변형·diff·비교는 파일 시스템을 모르며 IntegrationPort와 Production.profile을 통해 외부 작업을 요청한다. LocalIntegration이 허용 루트·계획·생성 파일 소유권·충돌·원자적 디렉터리 교체를 담당한다. FileRepository의 batch manifest는 여러 신규 프로젝트의 일괄 가시성을 보장하고 이후 개별 저장은 기존 revision/history 흐름을 사용한다.
+
+호스트 게임 데이터·포인터는 생성물의 공개 API로 주입한다. 이벤트는 이름과 데이터만 전달하며 소리 재생이나 게임 상태 변경은 호스트가 결정한다. Three 월드 출력도 2D 구성의 평면이고 입체 파티클 물리는 포함하지 않는다. Flame 어댑터는 별도 패키지여서 일반 Flutter 생성물에 Flame 의존성을 강제하지 않는다.

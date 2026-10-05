@@ -24,7 +24,7 @@ async function cli(args, expected=0) {
 const call = async (name,input={},extra=[],expected=0) => cli(['call',name,await file(input),...extra],expected);
 try {
   const tools=await cli(['tools']);
-  assert.equal(tools.tools.length,19);
+  assert.equal(tools.tools.length,27);
   const schema=await cli(['tools','project_update']);
   assert.ok(schema.inputSchema.required.includes('expectedRevision'));
   const caps=await call('capabilities_get');

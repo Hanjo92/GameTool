@@ -1,6 +1,9 @@
 import { $, field } from "./dom.js";
 import { buildControls } from "./controls.js";
 import { setupInspector } from "./inspector.js";
+import { setupStudio, setStudioAssets } from "./studio-editor.js";
+import { createEditHistory } from "./edit-history.js";
+import { setupStudioWorkflows } from "./studio-workflows.js";
 import { readRecipe, fill, timeline } from "./recipe-form.js";
 import { particleStyles } from "../../runtimes/shared/particle-options.js";
 import { timelineFor, precise } from "../../runtimes/shared/sequence.js";
@@ -23,7 +26,6 @@ import type {
 } from "../../packages/core/model.js";
 import type { Artifact } from "../../packages/core/application.js";
 buildControls();
-setupInspector();
 let token = "",
   project: Project,
   target: Target = "phaser",
@@ -58,8 +60,10 @@ function updateEditorState() {
     ? `· REV ${previewSnapshot.revision}${fresh ? "" : " · 이전 설정"}`
     : "";
 }
+let editHistory: ReturnType<typeof createEditHistory> | undefined;
 function setDirty(value: boolean) {
   dirty = value;
+  if (value) editHistory?.record();
   updateEditorState();
 }
 interface EditorPreset {
@@ -73,6 +77,52 @@ let presets: EditorPreset[] = [];
 const iframe = $<HTMLIFrameElement>("preview");
 const message = (value: unknown) =>
   iframe.contentWindow?.postMessage(value, location.origin);
+setupStudio(message);
+setupInspector();
+editHistory = createEditHistory(
+  () => {
+    setDirty(true);
+    status("편집 기록을 복원했습니다. 적용하면 미리보기에 반영됩니다.");
+  },
+  () => busy,
+);
+setupStudioWorkflows({
+  api,
+  save,
+  project: () => project,
+  target: () => target,
+  wait: waitJob,
+  status,
+  refreshProjects,
+  run: (work) =>
+    guard(async () => {
+      if (busy) return;
+      setBusy(true);
+      try {
+        await work();
+      } finally {
+        jobId = "";
+        setBusy(false);
+      }
+    }),
+  artifact: async () => {
+    await save();
+    if (
+      artifact?.projectId === project.id &&
+      artifact.revision === project.revision &&
+      artifact.target === target
+    )
+      return artifact;
+    const started = await api("code_generate", {
+      projectId: project.id,
+      expectedRevision: project.revision,
+      target,
+    });
+    const job = await waitJob(started.jobId);
+    await showArtifact(job.artifactId);
+    return artifact!;
+  },
+});
 function status(text: string, error = false) {
   $("status").textContent = text;
   $("status").classList.toggle("error", error);
@@ -103,14 +153,19 @@ function setBusy(value: boolean) {
     | HTMLSelectElement
     | HTMLTextAreaElement
   >(
-    "#properties button,#properties input,#properties select,#properties textarea,#projects,#project-name,#new-project,#project-tools button,#project-tools input,#project-tools select,#preset-keep-text,.target-tabs button,.preset,#apply,#generate,#settings-reset",
+    "#properties button,#properties input,#properties select,#properties textarea,#projects,#project-name,#new-project,#project-tools button,#project-tools input,#project-tools select,#preset-keep-text,.target-tabs button,.preset,#apply,#generate,#settings-reset,#studio-workflows button,#studio-workflows input,#studio-workflows select,#studio-workflows textarea",
   ))
-    el.disabled = value;
+    if (el.closest("#studio-panel")) {
+      if (value) el.dataset.wasDisabled = String(el.disabled);
+      el.disabled = value || el.dataset.wasDisabled === "true";
+      if (!value) delete el.dataset.wasDisabled;
+    } else if (el.id !== "integration-apply") el.disabled = value;
   $("cancel").hidden = !value;
   field("restore-project").disabled = value || !field("project-history").value;
   field("delete-preset").disabled = value || !field("user-presets").value;
   field("validate").disabled = value || !artifact;
   field("download").disabled = value || !artifact;
+  editHistory?.refresh();
 }
 async function refreshProjects() {
   const items: Project[] = await api("projects_list");
@@ -127,8 +182,11 @@ function load(p: Project) {
   field("project-name").value = p.name;
   setDirty(false);
   localStorage.setItem("gametool-project", p.id);
+  editHistory?.reset();
+  window.dispatchEvent(new Event("gametool-project-loaded"));
 }
 async function save() {
+  editHistory?.flush();
   if (dirty) {
     project = await api("project_update", {
       projectId: project.id,
@@ -309,6 +367,7 @@ for (const button of document.querySelectorAll<HTMLButtonElement>(
   button.onclick = () =>
     guard(async () => {
       target = button.dataset.target as Target;
+      window.dispatchEvent(new Event("gametool-target-changed"));
       document
         .querySelectorAll("[data-target]")
         .forEach((el) => el.classList.toggle("active", el === button));
@@ -327,7 +386,10 @@ $("play").onclick = () => {
   $("play").setAttribute("aria-label", playing ? "일시 정지" : "재생");
 };
 $("restart").onclick = () => {
-  message({ type: "seek", time: 0 });
+  playing = true;
+  message({ type: "restart" });
+  $("play").textContent = "Ⅱ";
+  $("play").setAttribute("aria-label", "일시 정지");
 };
 field("scrub").oninput = () => {
   playing = false;
@@ -403,6 +465,7 @@ guard(async () => {
 async function refreshAssets() {
   const allAssets = await api("assets_list"),
     assets = allAssets.filter((a: any) => a.kind !== "font");
+  setStudioAssets(assets);
   const caps = await api("capabilities_get");
   for (const key of ["font", "subFont"]) {
     const el = $<HTMLSelectElement>(`layout-${key}`),
@@ -785,7 +848,14 @@ async function refreshPresets() {
     button.dataset.id = p.id;
     const art = document.createElement("div");
     art.className = "preset-art";
-    art.textContent = p.recipe.text.split("\n")[0];
+    const studio = p.recipe.studio?.enabled ? p.recipe.studio : undefined;
+    const widget = studio?.nodes.find(
+      (node) => node.enabled && node.widget,
+    )?.widget;
+    art.textContent = studio
+      ? widget?.label.replaceAll("{value}", String(widget.value)) ||
+        p.name.replace(/^Studio\s*·\s*/, "")
+      : p.recipe.text.split("\n")[0];
     const copy = document.createElement("div");
     copy.className = "preset-copy";
     const strong = document.createElement("strong");

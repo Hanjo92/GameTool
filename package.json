@@ -1,6 +1,6 @@
 {
   "name": "gametool",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -18,7 +18,10 @@
     "workspace:smoke": "tsx scripts/workspace-smoke.ts",
     "particles:visual": "tsx scripts/reference-visual.ts --particles-only",
     "skill:smoke": "node scripts/skill-smoke.mjs",
-    "security:repo": "node scripts/repository-check.mjs"
+    "security:repo": "node scripts/repository-check.mjs",
+    "studio:workflows": "tsx scripts/studio-workflow-smoke.ts",
+    "studio:mcp": "tsx scripts/studio-mcp-smoke.ts",
+    "studio:runtime": "tsx scripts/studio-runtime-smoke.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.0",

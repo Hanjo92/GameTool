@@ -12,7 +12,7 @@ try {
   await client.connect(new StdioClientTransport({ command: process.execPath,
     args: [join(root, "scripts/mcp.mjs"), "--workspace", workspace], stderr: "pipe" }));
   const listed = await client.listTools();
-  assert.equal(listed.tools.length, 19);
+  assert.equal(listed.tools.length, 27);
   assert.equal(listed.tools.find(t => t.name === "project_history")?.annotations?.readOnlyHint, true);
   assert.equal(listed.tools.find(t => t.name === "preset_delete")?.annotations?.destructiveHint, true);
   const call = async (name: string, args: Record<string, unknown> = {}) => {
@@ -33,12 +33,12 @@ try {
   const preset = await call("preset_save", { ...ref, name: "내 전투 스타일" });
   const fresh = await call("project_create", { name: "프리셋 재사용", presetId: preset.id });
   assert.deepEqual(copy.recipe, fresh.recipe);
-  assert.equal((await call("presets_list")).length, 91);
+  assert.equal((await call("presets_list")).length, 94);
   const stale: any = await client.callTool({ name: "project_restore", arguments: { ...ref, expectedRevision: 1, revision: 2 } });
   assert.equal(stale.isError, true);
   assert.equal(JSON.parse(stale.content[0].text).code, "REVISION_CONFLICT");
   await call("preset_delete", { presetId: preset.id });
-  assert.equal((await call("presets_list")).length, 90);
+  assert.equal((await call("presets_list")).length, 93);
   assert.deepEqual(await call("project_get", { projectId: fresh.id }), fresh);
   const artifacts = [];
   for (const target of ["flutter", "phaser", "three"]) {

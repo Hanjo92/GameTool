@@ -1,4 +1,5 @@
 import { $, field } from "./dom.js";
+import { readStudio, fillStudio } from "./studio-editor.js";
 import {
   defaultLayout,
   defaultMotion,
@@ -36,6 +37,7 @@ function readLayer(group: string) {
 export function readRecipe(): Recipe {
   return {
     schemaVersion: 1,
+    ...(readStudio() ? { studio: readStudio() } : {}),
     layout: readLayer("layout") as unknown as Recipe["layout"],
     motion: readLayer("motion") as unknown as Recipe["motion"],
     sequence: readLayer("sequence") as unknown as Recipe["sequence"],
@@ -147,4 +149,5 @@ export function fill(r: Recipe) {
     ? size
     : "";
   timeline(r);
+  fillStudio(r.studio);
 }

@@ -170,11 +170,15 @@ export function timelineFor(r: Recipe) {
 }
 export function pageAt(r: Recipe, seconds: number) {
   const timeline = timelineFor(r),
+    loopDuration = Math.max(
+      timeline.duration,
+      r.studio?.enabled ? r.studio.duration : 0,
+    ),
     t =
       r.loop &&
-      (!(r.loopCount ?? 0) || seconds < timeline.duration * (r.loopCount ?? 0))
-        ? seconds % timeline.duration
-        : Math.min(seconds, timeline.duration);
+      (!(r.loopCount ?? 0) || seconds < loopDuration * (r.loopCount ?? 0))
+        ? seconds % loopDuration
+        : Math.min(seconds, loopDuration);
   let index = timeline.pages.findIndex((p) => t >= p.start && t <= p.end);
   const keep =
     r.motion?.outEnabled === false || r.typography?.departure === "none";

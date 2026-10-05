@@ -1054,3 +1054,412 @@ footer {
     line-height: 1.8;
   }
 }
+
+/* Composition tools keep generated preview and local transform editing distinct. */
+.edit-history-toolbar,
+.studio-canvas-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+.edit-history-toolbar button {
+  font-size: 11px;
+  padding: 7px 9px;
+}
+.edit-history-toolbar span {
+  margin-left: auto;
+  font-size: 10px;
+}
+.studio-canvas-toolbar {
+  padding: 8px 10px;
+  background: #19221b;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.studio-canvas-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.studio-canvas-toolbar input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+.studio-canvas-toolbar input[type="number"] {
+  width: 48px;
+  padding: 4px;
+  margin: 0;
+}
+.studio-canvas-toolbar > span {
+  font-size: 10px;
+  opacity: 0.7;
+}
+#studio-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+  touch-action: none;
+}
+#studio-overlay.editing {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+.studio-outline {
+  fill: #c6fa7305;
+  stroke: #c6fa7355;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  cursor: move;
+}
+.studio-outline.selected {
+  fill: #c6fa730c;
+  stroke: #c6fa73;
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+}
+.studio-outline.locked {
+  stroke: #a6acac;
+  cursor: not-allowed;
+}
+.studio-handle {
+  fill: #c6fa73;
+  stroke: #172013;
+  stroke-width: 2;
+  cursor: nwse-resize;
+}
+.studio-handle[data-handle="rotate"] {
+  fill: #edcb80;
+  cursor: grab;
+}
+.studio-overlay-label {
+  fill: #e8ffd1;
+  paint-order: stroke;
+  stroke: #152313;
+  stroke-width: 3;
+  pointer-events: none;
+  font-family: monospace;
+}
+.studio-row {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  min-width: 0;
+  margin: 8px 0;
+}
+.studio-row > .field {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+}
+.studio-row > button {
+  flex: none;
+  padding: 8px;
+  font-size: 10px;
+}
+.studio-row input,
+.studio-row select {
+  min-width: 0;
+  width: 100%;
+}
+.studio-section {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  margin-top: 12px;
+  min-width: 0;
+}
+.studio-section > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.studio-section .studio-section {
+  padding: 9px 0 0;
+  margin-top: 8px;
+}
+.studio-section .field {
+  margin: 12px 0;
+}
+.studio-section input[type="checkbox"] {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 8px 0;
+}
+.studio-item {
+  background: #ffffff04;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 8px;
+  margin: 10px 0;
+}
+.studio-item > .studio-row {
+  flex-wrap: wrap;
+}
+.studio-item > .studio-row > .field {
+  min-width: 66px;
+}
+#studio-nodes {
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 12px 0;
+}
+.studio-node-row {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  margin-bottom: 4px;
+}
+.studio-node-row.selected {
+  background: #c6fa730d;
+  border-color: #728755;
+}
+.studio-node-row > button {
+  background: transparent;
+  padding: 7px 5px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.studio-node-row > button:first-child {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+.studio-node-row > button.nested {
+  padding-left: 18px;
+}
+.studio-align {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.studio-align button {
+  font-size: 10px;
+  padding: 7px;
+}
+#studio-node-inspector h3 {
+  font-size: 13px;
+  margin: 22px 0 8px;
+}
+.studio-event-log {
+  display: block;
+  margin-top: 12px;
+  padding: 8px;
+  background: #0e1310;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  font-size: 10px;
+}
+@media (max-width: 720px) {
+  .studio-canvas-toolbar {
+    font-size: 10px;
+    gap: 8px;
+  }
+  .studio-canvas-toolbar > span {
+    display: none;
+  }
+  .edit-history-toolbar span {
+    display: none;
+  }
+  #studio-nodes {
+    max-height: 240px;
+  }
+  .studio-section .studio-section {
+    padding-left: 8px;
+    border-left: 1px solid var(--line);
+  }
+}
+.studio-workflows {
+  margin-top: 18px;
+}
+.studio-workflow-body {
+  padding: 0 16px 16px;
+}
+.studio-workflow-body > .studio-section:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+.studio-workflow-actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.studio-workflow-actions button {
+  padding: 9px 11px;
+  font-size: 11px;
+}
+.studio-workflow-actions > .field {
+  margin: 0;
+  width: 130px;
+}
+.studio-variant {
+  padding: 10px;
+  background: #ffffff03;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin: 10px 0;
+}
+.studio-variant > .studio-row {
+  flex-wrap: wrap;
+}
+.studio-variant > .studio-row > .field:first-child {
+  flex-basis: 150px;
+}
+.studio-variant > .studio-row > .field {
+  min-width: 70px;
+}
+.studio-variant textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  font: 11px/1.6 monospace;
+}
+.studio-result {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 280px;
+  overflow: auto;
+  background: #0c120f;
+  padding: 12px;
+  border-radius: 5px;
+  font: 10px/1.7 monospace;
+  color: #b4c5b4;
+}
+.studio-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.studio-comparison figure {
+  min-width: 0;
+  margin: 0;
+}
+.studio-comparison figcaption {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.studio-comparison iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #131813;
+}
+.studio-workflows summary span {
+  line-height: 1.6;
+}
+@media (max-width: 720px) {
+  .studio-comparison {
+    grid-template-columns: 1fr;
+  }
+  .studio-workflow-body {
+    padding: 0 10px 10px;
+  }
+  .studio-workflow-actions > button {
+    flex-grow: 1;
+  }
+}
+#studio-panel label.studio-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.5;
+}
+#studio-panel label.studio-toggle input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin: 0;
+}
+.studio-timeline {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+.studio-timeline > summary {
+  font-size: 11px;
+  color: #acbd9e;
+  cursor: pointer;
+}
+#studio-timeline-lanes {
+  max-height: 184px;
+  overflow: auto;
+  margin-top: 10px;
+  padding-right: 8px;
+}
+.studio-lane {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 27px;
+}
+.studio-lane-name {
+  font-size: 10px;
+  padding: 4px;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: transparent;
+  color: #b4c4ad;
+}
+.studio-lane-track {
+  height: 18px;
+  position: relative;
+  background: #25302770;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.studio-lane-bar {
+  position: absolute;
+  top: 3px;
+  height: 12px;
+  padding: 0;
+  background: #61794c70;
+  border: 1px solid #6d825854;
+  border-radius: 2px;
+}
+.studio-lane-bar.selected {
+  background: #8ba65d99;
+  border-color: #c6fa73;
+}
+.studio-lane-key {
+  position: absolute;
+  top: -1px;
+  transform: translateX(-50%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e0e9d6;
+  font-size: 10px;
+  height: 20px;
+  min-width: 12px;
+}
+.studio-lane-key.event {
+  color: #ecc882;
+}
+@media (max-width: 720px) {
+  .studio-lane {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 5px;
+  }
+}

@@ -63,7 +63,7 @@ try {
   const [operation, ...values] = positional;
   const arities = { tools:[0,1], call:[1,2], patch:[3,3], import:[1,1], wait:[1,1] };
   if (!arities[operation] || values.length < arities[operation][0] || values.length > arities[operation][1]) throw failure('USAGE','Invalid command or arguments; use --help');
-  if (wait && (operation !== 'call' || !['code_generate','preview_start','code_validate'].includes(values[0]))) throw failure('USAGE','--wait applies only to code_generate, preview_start or code_validate');
+  if (wait && (operation !== 'call' || !['code_generate','preview_start','code_validate','studio_comparison_start','performance_start'].includes(values[0]))) throw failure('USAGE','--wait applies only to code_generate, preview_start, code_validate, studio_comparison_start or performance_start');
   if (Number(process.versions.node.split('.')[0]) < 22) throw failure('NODE_UNAVAILABLE','Node.js 22+ is required');
   const candidates = rootArg ? [resolve(rootArg)] : [fileURLToPath(new URL('../../../',import.meta.url))];
   let root;

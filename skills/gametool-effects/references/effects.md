@@ -1,6 +1,6 @@
 # Choosing and composing effects
 
-Read live `capabilities_get` and the relevant tool input schema. This guide describes the v0.4 recipe, not a frozen exhaustive enum catalog.
+Read live `capabilities_get` and the relevant tool input schema. This guide describes the legacy layers retained in v0.5, not a frozen exhaustive enum catalog. For multiple layers, widgets, sprite emitters and host binding, read studio.md.
 
 ## Text and decoration
 

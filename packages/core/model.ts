@@ -1,3 +1,5 @@
+import { createStudioPresets } from "./studio-presets.js";
+import { makeStudioSchema } from "./studio-schema.js";
 import { particleFields } from "../../runtimes/shared/particle-options.js";
 import { referencePresets } from "./reference-presets.js";
 import {
@@ -144,6 +146,7 @@ const optionSchemas = Object.fromEntries(
 export const recipeSchema = z
   .object({
     schemaVersion: z.literal(1),
+    studio: makeStudioSchema(particlesSchema as unknown as z.ZodType<import("../../runtimes/shared/motion.js").Particles>).optional(),
     layout: optionSchemas.layout,
     motion: optionSchemas.motion,
     sequence: optionSchemas.sequence,
@@ -402,6 +405,7 @@ export const presets = [
     },
   },
   ...referencePresets,
+  ...createStudioPresets(defaultRecipe),
 ] as const;
 export interface Project {
   id: string;

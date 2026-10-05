@@ -57,7 +57,7 @@ try {
   });
   await client.connect(transport);
   const listed = await client.listTools();
-  assert.equal(listed.tools.length, 19);
+  assert.equal(listed.tools.length, 27);
   const call = async (name: string, args: Record<string, unknown> = {}) => {
     const result: any = await client.callTool({ name, arguments: args });
     if (result.isError) throw new Error(result.content[0].text);

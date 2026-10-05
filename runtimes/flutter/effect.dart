@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'motion.dart';
 import 'layers.dart';
+import 'studio.dart';
 
 /// Embeddable text effect. Parent owns the controller; this widget owns one ticker.
 class TextEffect extends StatefulWidget {
@@ -64,50 +65,74 @@ class _TextEffectState extends State<TextEffect>
             animation: widget.controller,
             builder: (context, child) {
               final s = widget.controller.state;
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  CustomPaint(
-                    painter: ScenePainter(
-                      r,
-                      widget.controller.time,
-                      widget.images,
+              return Listener(
+                onPointerDown: (event) => widget.controller.pointer(
+                  'down',
+                  event.localPosition.dx,
+                  event.localPosition.dy,
+                ),
+                onPointerUp: (event) => widget.controller.pointer(
+                  'up',
+                  event.localPosition.dx,
+                  event.localPosition.dy,
+                ),
+                onPointerCancel: (event) => widget.controller.pointer(
+                  'cancel',
+                  event.localPosition.dx,
+                  event.localPosition.dy,
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CustomPaint(
+                      painter: ScenePainter(
+                        r,
+                        widget.controller.time,
+                        widget.images,
+                      ),
                     ),
-                  ),
-                  if (r.textVisible && r.typography['enabled'] != true)
-                    Center(
-                      child: Transform.translate(
-                        offset: Offset(0, s['y']!),
-                        child: Transform.scale(
-                          scale: s['scale']!,
-                          child: Opacity(
-                            opacity: s['opacity']!,
-                            child: Text(
-                              widget.text ?? r.text,
-                              textAlign: TextAlign.center,
-                              softWrap: false,
-                              style: TextStyle(
-                                fontFamily: 'GameToolSans',
-                                fontSize: r.fontSize,
-                                fontWeight: FontWeight.bold,
-                                fontVariations: const [
-                                  ui.FontVariation('wght', 700),
-                                ],
-                                color:
-                                    widget.color ??
-                                    Color(
-                                      int.parse(
-                                        'ff${r.color.substring(1)}',
-                                        radix: 16,
+                    if (r.textVisible && r.typography['enabled'] != true)
+                      Center(
+                        child: Transform.translate(
+                          offset: Offset(0, s['y']!),
+                          child: Transform.scale(
+                            scale: s['scale']!,
+                            child: Opacity(
+                              opacity: s['opacity']!,
+                              child: Text(
+                                widget.text ?? r.text,
+                                textAlign: TextAlign.center,
+                                softWrap: false,
+                                style: TextStyle(
+                                  fontFamily: 'GameToolSans',
+                                  fontSize: r.fontSize,
+                                  fontWeight: FontWeight.bold,
+                                  fontVariations: const [
+                                    ui.FontVariation('wght', 700),
+                                  ],
+                                  color:
+                                      widget.color ??
+                                      Color(
+                                        int.parse(
+                                          'ff${r.color.substring(1)}',
+                                          radix: 16,
+                                        ),
                                       ),
-                                    ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
+                    CustomPaint(
+                      painter: StudioPainter(
+                        widget.controller.studio,
+                        widget.controller.time,
+                        widget.images,
+                      ),
                     ),
-                ],
+                  ],
+                ),
               );
             },
           ),

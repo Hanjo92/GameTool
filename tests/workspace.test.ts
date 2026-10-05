@@ -86,7 +86,7 @@ test("copies and user presets are independent; deleting a preset preserves deriv
     assert.deepEqual(fromPreset.recipe, original.recipe);
     assert.deepEqual((await repo.project(copy.id)).recipe, original.recipe);
     await app.execute("preset_delete", { presetId: preset.id });
-    assert.equal((await app.execute("presets_list", {})).length, 90);
+    assert.equal((await app.execute("presets_list", {})).length, 93);
     assert.deepEqual(await repo.project(fromPreset.id), fromPreset);
     assert.deepEqual(await repo.project(p.id), p);
     await assert.rejects(app.execute("preset_delete", { presetId: preset.id }), { code: "NOT_FOUND" });

@@ -1,6 +1,6 @@
 ---
 name: gametool-effects
-description: Create, edit, preview, and validate local game UI and particle effects with GameTool MCP, producing standalone Flutter, Phaser, or Three.js code. Use for animated titles, cut-ins, trailers, background motion, image layers, particles, and reusable effect presets.
+description: Create, edit, preview, and validate local game UI and particle effects with GameTool MCP, producing standalone Flutter, Phaser, or Three.js code. Use for animated titles, cut-ins, trailers, background motion, image layers, particles, reusable effect presets, layered HUD widgets, data binding, and multi-emitter compositions.
 ---
 
 # GameTool Effects
@@ -30,6 +30,8 @@ For invocation syntax and job handling, read [references/client.md](references/c
 2. Get the current project and revision. `project_update` takes the **whole recipe**, not a partial layer. Merge only requested fields into that snapshot, preserving other layers, timing, fonts, and images. Send its `expectedRevision`. The helper's `patch PROJECT_ID EXPECTED_REVISION PATCH.json` does this merge; arrays replace, objects merge, null stays null. On REVISION_CONFLICT, reload and reconcile the user's change; do not just increment the number or resubmit the stale recipe.
 3. Import requested files through `asset_import` (or helper `import PATH`), then use returned IDs. Images: static PNG/JPEG/WebP, 8 MiB/16 MP. Fonts: TTF/OTF/WOFF/WOFF2, 32 MiB. Originals are retained. Prefer font files/catalog fonts for portable output; `local:` names require that font on the target computer.
 4. Apply text, frame, background, image, and/or particles as requested. Read [references/effects.md](references/effects.md) for timing, style application, layer composition, and parameter pitfalls. The installed app's `docs/mcp-contract.md` is the full model reference; live tool schemas and capabilities take priority over this skill's version notes.
+For Studio layers, game data/events, batch comparisons, host integration, or performance checks, read [references/studio.md](references/studio.md).
+
 5. Save before starting production. `preview_start` and `code_generate` pin an exact revision. Review relevant entry/hold/exit or burst times in the actual target preview. A single successful still does not prove the animation works.
 
 ## Produce and verify
@@ -44,4 +46,4 @@ For invocation syntax and job handling, read [references/client.md](references/c
 
 `preset_save` captures an exact saved revision. `project_history` lists up to 30 previous saves; `project_restore` writes the chosen state as a new revision and retains the state being replaced. `preset_delete` removes only a user preset, but do it only when deletion was requested or for a clearly scoped disposable test fixture.
 
-Use MCP/Core for project mutations; do not edit `.gametool/projects` JSON directly. Do not print or copy the `service.json` token. No API key or cloud model is required. Current effects are 2D screen-space compositions with one particle emitter, not volumetric 3D simulation or a shader graph. GameTool outputs runtime code; APNG/WebP sprite encoding is not the workflow.
+Use MCP/Core for project mutations; do not edit `.gametool/projects` JSON directly. Do not print or copy the `service.json` token. No API key or cloud model is required. Studio supports multiple 2D emitters, widgets and layers; Three.js can place the composition on a world-space billboard plane. Volumetric 3D simulation and shader graphs are outside this model. GameTool outputs runtime code; APNG/WebP sprite encoding is not the workflow.

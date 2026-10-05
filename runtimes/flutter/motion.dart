@@ -1,4 +1,5 @@
 import 'sequence.dart';
+import 'studio.dart';
 import 'options.dart';
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
@@ -17,8 +18,10 @@ class EffectRecipe {
       layout,
       motion,
       sequence,
-      backdrop;
+      backdrop,
+      studio;
   const EffectRecipe({
+    this.studio = const {},
     this.textVisible = true,
     this.loopCount = 0,
     this.typography = const {},
@@ -65,9 +68,14 @@ class EffectRecipe {
     motion: motion,
     sequence: sequence,
     backdrop: backdrop,
+    studio: studio,
   );
-  double get duration =>
+  double get legacyDuration =>
       precise(this) ? timelineFor(this).duration : enter + hold + exit;
+  double get duration => math.max(
+    legacyDuration,
+    studio['enabled'] == true ? sn(studio['duration']) : 0,
+  );
 }
 
 Map<String, double> evaluate(EffectRecipe r, double seconds) {
@@ -80,7 +88,7 @@ Map<String, double> evaluate(EffectRecipe r, double seconds) {
       : t < r.enter + r.hold
       ? 1.0
       : r.exit > 0
-      ? math.max(0.0, (r.duration - t) / r.exit)
+      ? math.max(0.0, (r.legacyDuration - t) / r.exit)
       : 0.0;
   if (precise(r)) {
     final p = pageAt(r, seconds),
@@ -111,7 +119,41 @@ class EffectController extends ChangeNotifier {
   final EffectRecipe recipe;
   double time = 0, _speed = 1;
   bool playing = false;
-  EffectController(this.recipe);
+  late final StudioRuntime studio;
+  EffectController(this.recipe) {
+    studio = StudioRuntime(recipe);
+  }
+  void setData(Map<String, dynamic> data) {
+    studio.setData(data);
+    notifyListeners();
+  }
+
+  void setNodeState(String id, String state) {
+    studio.setNodeState(id, state);
+    notifyListeners();
+  }
+
+  void setQuality(Map<String, dynamic> quality) {
+    studio.setQuality(quality);
+    notifyListeners();
+  }
+
+  VoidCallback onEvent(void Function(Map<String, dynamic>) listener) =>
+      studio.onEvent(listener);
+  String? hitTest(double x, double y) => studio.hitTest(x, y);
+  String? pointer(String type, double x, double y) {
+    final id = studio.pointer(type, x, y);
+    notifyListeners();
+    return id;
+  }
+
+  Map<String, dynamic> profile() => studio.profile();
+  @override
+  void dispose() {
+    studio.dispose();
+    super.dispose();
+  }
+
   double get speed => _speed;
   set speed(double value) {
     if (!value.isFinite || value <= 0 || value > 8)
@@ -122,7 +164,9 @@ class EffectController extends ChangeNotifier {
   Map<String, double> get state => evaluate(recipe, time);
   void seek(double seconds) {
     evaluate(recipe, seconds);
+    final previous = time;
     time = seconds;
+    studio.transport('seek', previous, time);
     notifyListeners();
   }
 
@@ -137,20 +181,28 @@ class EffectController extends ChangeNotifier {
   }
 
   void restart() {
+    final previous = time;
     time = 0;
+    studio.transport('restart', previous, time);
     play();
   }
 
   void advance(double deltaSeconds) {
     if (!deltaSeconds.isFinite || deltaSeconds < 0)
       throw ArgumentError('Invalid delta');
-    if (!playing) return;
+    final transitioning = studio.advanceUI(deltaSeconds);
+    if (!playing) {
+      if (transitioning) notifyListeners();
+      return;
+    }
+    final previous = time;
     time += deltaSeconds * speed;
     final end = recipe.duration * (recipe.loop ? recipe.loopCount : 1);
     if ((!recipe.loop || recipe.loopCount > 0) && time >= end) {
       time = end;
       playing = false;
     }
+    studio.transport('advance', previous, time);
     notifyListeners();
   }
 }

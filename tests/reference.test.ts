@@ -47,7 +47,7 @@ const preciseRecipe = () =>
   });
 test("all 80 audited compositions have valid independent timings, layouts and decoration settings", () => {
   assert.equal(referencePresets.length, 80);
-  assert.equal(presets.length, 90);
+  assert.equal(presets.length, 93);
   assert.equal(new Set(referencePresets.map((p) => p.id)).size, 80);
   for (const p of referencePresets) {
     const r = recipeSchema.parse(p.recipe);
